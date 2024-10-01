@@ -36,14 +36,14 @@ parentheses surrounding the variable:
 
 Functions of many variables:
 
-> digits2Number x y = x * 10 + y
+> digitsToNumber x y = x * 10 + y
 
 So, don't write 'digits2Number(x,y)'. That is soooo non-Haskell!
 
 We can now apply these functions. Again, the parentheses are dropped:
 
 > y = inc 2
-> z = digits2Number 4 2
+> z = digitsToNumber 4 2
 
 Function names should be written with the initial letter in lowercase. Other
 than that, the usual rules for identifiers apply.
@@ -53,15 +53,6 @@ Some built in functions: 'max', 'min', 'succ', 'div', 'mod'.
 Infix format:
 
 > w = 25 `div` 2
-
-Note that older versions of interactive interpreter (ghci) require 'let' in 
-front of function/value definition:
-
---> let x = 2
---> let inc x = x + 1
-
-This is no longer required but many older materials still mention this as 
-needed.
 
 === STRINGS AND CHARACTERS ===================================================
 
@@ -101,17 +92,14 @@ expression.
 
 Playing with strings a bit:
 
-> merge s1 s2 = 
->   s1 ++ (if s1 < s2 then " is not " else " is ") ++ s2
-
-> merge2 s1 s2 = 
->   s1 ++ " is " ++ (if s1 < s2 then "not " else "") ++ s2
+> compareStrings s1 s2 = 
+>   s1 ++ " comes " ++ (if s1 < s2 then "before " else "after ") ++ s2
 
 === GUARDS ===================================================================
 
-> merge3 s1 s2 
->   | s1 < s2   = s1 ++ " is not " ++ s2
->   | otherwise = s1 ++ " is " ++ s2
+> compareStrings' s1 s2 
+>   | s1 < s2   = s1 ++ " comes before " ++ s2
+>   | otherwise = s1 ++ " comes after " ++ s2
 
 > grade score 
 >   | score < 50 = 1
@@ -133,10 +121,11 @@ Playing with strings a bit:
   if it's shorter than 2 characters (use 'length' function).
 
 1.2.
-- Give a simpler definition of 'showSalary', using only one if-then-else
-  construct.
-- Additionally check that salary is non-negative. If it's negative, return an
-  adequate message.
+- Write a function that takes a firstName, a lastName, and age and wishes a
+  happy birthday. If the person is older than fifty, it should address them
+  more formally:
+    wish "John" "Smith" 51 = "Happy birthday, Mr. Smith"
+    wish "Ed" "Chen" 43 = "Happy birthday, Ed
 
 === LISTS ====================================================================
 
