@@ -3,7 +3,7 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2022/2023
+Academic Year 2023/2024
 
 LECTURE 2: Lists (cont.) and tuples
 
