@@ -235,14 +235,6 @@ won't work for all list types (why this is so will be clear after Lecture 3).
   initials "James" "Bond" => "J. B."
 
 1.3.
-- Define a function that concatenates two strings, so that the longest string
-  always comes first.
-
-1.4.
-- Define a function 'safeHead' that returns an empty list if 'l' is an empty
-  list, otherwise it returns its first element wrapped inside a singleton list.
-
-1.5.
 - Define a function 'hasDuplicates' that checks whether a list contains
   duplicate elements (use 'nub') and returns True or False.
 
