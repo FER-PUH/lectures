@@ -3,53 +3,84 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2017/2018
+Academic Year 2024/2025
 
 LECTURE 3: Types and type classes
 
-v1.1
+v1.2
 
 (c) 2017 Jan Šnajder
+    2024 Luka Hadžiegrić
 
-==============================================================================
+================================================================================
 
-> {-# OPTIONS_GHC -Wno-x-partial #-}
->
 > import Data.Char
 > import Data.List
 
-== INTRO =====================================================================
+== INTRO =======================================================================
 
-Last week we've covered list and tuples. You now know how to perform the basic
-operations on lists and how to construct them using list comprehensions.
+So far, we've covered some basics of values, functions, guards, strings, lists,
+tuples and list comprehensions. However, until now, we have not dealt with
+types.
 
-Today, we look into types. Haskell is a STRONGLY and STATICALLY typed language.
+Haskell is (among other things):
 
-* STRONGLY typed => it's not possible for the programmer to work around the
-  restrictions imposed by the type system.
+* STRONGLY typed
+  A loosely defined term generally used to describe programming languages that
+  prevent programmers from circumventing their type system.
 
-* STATICALLY typed => the type of each expression is known at compile
-  time and the code can be checked for type errors by the compiler/interpreter.
+* STATICALLY typed
+  Means that the type of each expression is known at compile time, and the code
+  can be checked for type errors.
 
 To be able to check for type errors, Haskell has to do TYPE INFERENCE. To this
 end, Haskell uses the so-called Hindley-Milner (HM) type system. HM allows to
 infer the most general type of a given program, using the type annotations
 provided by the programmer as a starting point.
 
-=== TYPES ====================================================================
+== TYPES =======================================================================
 
-Every expression in Haskell has a type. The type of expression can in principle
-be determined automatically using type inference. (NZQR)
+In Haskell, as in many other languages, you'll find the usual data types like
+Bool, Int, Float, Double, Word (unsigned Int), String; as well as some less
+common ones like () (pronounced unit), tuple (a, b, ...), Integer (infinitely
+big integers), Natural (infinitely big natural numbers) and many more.
 
-Command ':type' (or ':t') and operator '::'.
+With those in mind, let's pause for a minute and think about "what is a type"?
 
-Types for numbers, string, lists, tuples...
+* Types may be inhabited by values
+  If we take Integer as an example, we can say that it is inhabited by values
+  like -1, 5, 0, -22, etc. However, there are also types that have no values,
+  like Void, however they are useful in some very specific cases.
 
-Functions also have types. E.g., 'lines', 'chr', 'ord', 'toUpper'.
+* Types are not sets
+  You might liken types to sets, however they have a very subtle but important
+  difference with a big impact on type inference.
 
-It's a good habit always to provide the type of the function (a "type
-signature" or a "type annotation") above function definition. Ideally, you
-should do that before defining the function.
+  When we talk about sets, we can say that sets, in some sense, imply values.
+  However, when we talk about types, then values imply the types.
+
+  In other words, in the context of sets, if we look at a particular value, it
+  could belong to multiple sets, however, in the context of types, looking at a
+  value should generally immediately tell us which type it inhabits.
+
+  There are some exceptions, and one of them are numbers due to practical
+  reasons, as it would be a paint to write e.g. I12 to be explicit that we are
+  talking about 12 that inhabits Int.
+
+* Types are interpretations of representations
+
+  If we take a random byte in our memory, we may see something like e.g.
+  10110110. But, what does it mean?
+
+  Well, it means what ever we say it means. We could interpret it as a decimal
+  number 182, or as the ASCII character ¶, or perhaps as some configuration
+  with 8 options that can be turned on or off.
+
+  Types are here to tell us how exactly we should interpret a certain data
+  representation.
+
+From now on, you will be expected to provide type signatures for all top level
+definitions. So let's take a look at how to do that.
 
 > addPairs :: [(Int, Int)] -> [Int]
 > addPairs xs = [ x + y | (x, y) <- xs]
@@ -57,27 +88,7 @@ should do that before defining the function.
 > lowerCase :: [Char] -> [Char]
 > lowerCase s = [toLower c | c <- s]
 
-'[Char]' is equivalent to 'String'. E.g.:
-
-> onlyAlpha :: String -> String
-> onlyAlpha s = [c | c <- s, isAlpha c]
-
-Why write type annotations before writing the definitions, if Haskell's type
-inference can determine the types on its own?
-
-There are at least three reasons:
-(1) Type annotations serve as documentation.
-(2) Type annotations help us to clarify what it is that the function should
-    actually do, even before we start coding it.
-(3) Type annotations enable us to detect type errors: if the type of the
-    definition does not match against the provided type, the compiler will
-    complain, because the HM system will detect an inconsistency.
-
-> removeEverySecond :: String -> String
-> removeEverySecond s =
->   unwords [ snd ix | ix <- zip [1..] $ words s, even $ fst ix]
-
-Standard numeric types: Int, Integer, Char, Float, Double, Bool.
+Types serve both as a light form of documentation and as basic tests for your code.
 
 > factorial :: Int -> Int
 > factorial n = product [1..n]
@@ -88,9 +99,10 @@ Standard numeric types: Int, Integer, Char, Float, Double, Bool.
 > circumference' :: Double -> Double
 > circumference' r = 2 * pi * r
 
-What about functions with more than one argument?
+So far, we've only used functions that take a single argument, but what if we
+want to pass in multiple values into a function.
 
-If a function takes multiple arguments, we can group them together in a tuple:
+We could use tuples and do something like this:
 
 > concatThree' :: (String, String, String) -> String
 > concatThree' (s1, s2, s3) = s1 ++ s2 ++ s3
@@ -245,10 +257,11 @@ functions:
 
 === TYPE CLASSES =============================================================
 
-A type class is an INTERFACE that determines the behavior of some type.
+A type class is an INTERFACE that determines the interactions that we can have
+with some type.
 
-If type 'a' belongs to some type class, it means that type 'a' supports the
-operations defined by that type class.
+If type 'a' belongs to some type class, it means that functions provided by
+that type class can be applied to the type 'a'.
 
 Type definitions can have CLASS CONSTRAINTS. We use the symbol '=>' to define
 such.
@@ -422,4 +435,3 @@ So far we've only written simple functions. Haskell syntax is more
 sophisticated than what we've seen so far. Next, we'll look into pattern
 matching and local definitions. Also, we'll take a look into how to set up a
 Haskell project and package it using Cabal.
-
