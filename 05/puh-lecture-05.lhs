@@ -102,7 +102,7 @@ pattern matching, and combine the results:
 
 > maximum' :: Ord a => [a] -> a
 > maximum' [x]    = x
-> maximum' (x : xs) = max x (maximum' xs)
+> maximum' (x :xs) = max x (maximum' xs)
 
 (What would happen if we were to apply this function to an empty list?)
 
@@ -164,9 +164,9 @@ provide 0 as the first argument, we can define a WRAPPER FUNCTION:
 
 2.1.
 - Define a recursive function 'modMult n m xs' that multiplies each element of
-  a list 'xs' with 'n' modulo 'm'.
+  a list 'xs' with 'n' and then does modulo 'm'.
   modMult :: Integral a => a -> a -> [a] -> [a]
-  modMult 3 4 [1,2,3] => [3,6,9]
+  modMult 3 4 [1,2,3] => [3, 2, 1]
 
 2.2.
 - Define a function 'addPredecessor' that adds to each element of a list the
@@ -216,6 +216,7 @@ Does this work as expected if n < 0 (it should return an empty list)?
 How can we extend the above definition so that, if n > length xs, the last
 element of the list gets repeated?
 supertake 5 [1,2,3] => [1,2,3,3,3]
+
 
 > supertake :: Int -> [a] -> [a]
 > supertake _ [] = []

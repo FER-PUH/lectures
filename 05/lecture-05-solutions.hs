@@ -41,7 +41,7 @@ addPredecessor xs = go 0 xs
 equalTriplets :: (Eq a) => [(a, a, a)] -> [(a, a, a)]
 equalTriplets [] = []
 equalTriplets (t@(x, y, z) : ts)
-    | x == y && y == z = t : equalTriplets ts
+    | x == y, y == z = t : equalTriplets ts
     | otherwise = equalTriplets ts
 
 -- 3.2.
@@ -66,9 +66,10 @@ replicate' n x
 -- >>> drop' (-2) [1,2,3]
 -- [1,2,3]
 drop' :: Int -> [a] -> [a]
+drop' _ [] = []
 drop' n xs
     | n <= 0 = xs
-    | otherwise = drop (n - 1) (tail xs)
+    | otherwise = drop' (n - 1) (tail xs)
 
 -- >>> drop' 2 [1,2,3]
 -- [3]
@@ -78,7 +79,7 @@ drop' n xs
 -- [1,2,3]
 drop'' :: Int -> [a] -> [a]
 drop'' n xs
-    | n < 0 = reverse $ drop (-n) (reverse xs)
+    | n < 0 = reverse $ drop' (-n) (reverse xs)
     | otherwise = drop' n xs
 
 -- 4.2.
