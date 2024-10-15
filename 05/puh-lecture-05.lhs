@@ -44,20 +44,20 @@ recursion.
 Here's how we might implement the factorial function in Haskell:
 
 > fact :: Integral a => a -> a 
-> fact x = if x==0 then 1 else x * fact (x-1)
+> fact x = if x == 0 then 1 else x * fact (x - 1)
 
 Or, better, with pattern matching (separate function bodies):
 
 > fact' :: Integral a => a -> a 
 > fact' 0 = 1
-> fact' x = x * fact' (x-1)
+> fact' x = x * fact' (x - 1)
 
 Another typical example is getting the nth Fibonacci Number:
 
 > fib :: Int -> Int 
 > fib 0 = 0
 > fib 1 = 1
-> fib n = fib (n-1) + fib (n-2)
+> fib n = fib (n - 1) + fib (n - 2)
 
 (This definition is not the best one. Do you know why?)
 
@@ -65,9 +65,9 @@ Haskellers are quite proud of the quicksort definition:
 
 > quicksort :: Ord a => [a] -> [a]
 > quicksort [] = []
-> quicksort (x:xs) = quicksort ys ++ [x] ++ quicksort zs
->   where ys = [y | y <- xs, y <= x]
->         zs = [z | z <- xs, z  > x]
+> quicksort (x : xs) = quicksort lesser ++ [x] ++ quicksort greater
+>   where lesser = [y | y <- xs, y <= x]
+>         greater = [y | y <- xs, y  > x]
 
 == STRUCTURAL RECURSION ======================================================
 
@@ -81,15 +81,15 @@ pattern matching, and combine the results:
 
 > sum' :: Num a => [a] -> a
 > sum' []     = 0
-> sum' (x:xs) = x + sum' xs
+> sum' (x : xs) = x + sum' xs
 
 > length' :: [a] -> Int
 > length' []     = 0
-> length' (_:xs) = 1 + length' xs
+> length' (_ : xs) = 1 + length' xs
 
 > incList :: Num a => [a] -> [a]
 > incList []     = []
-> incList (x:xs) = (x + 1) : incList xs
+> incList (x : xs) = (x + 1) : incList xs
 
 (The last function can be defined via list comprehension. How?)
 
@@ -98,11 +98,11 @@ pattern matching, and combine the results:
 
 > concat' :: [[a]] -> [a]
 > concat' []       = []
-> concat' (xs:xss) = xs ++ concat' xss
+> concat' (xs : xss) = xs ++ concat' xss
 
 > maximum' :: Ord a => [a] -> a
 > maximum' [x]    = x
-> maximum' (x:xs) = x `max` maximum' xs
+> maximum' (x : xs) = max x (maximum' xs)
 
 (What would happen if we were to apply this function to an empty list?)
 
@@ -127,7 +127,7 @@ foo (x:xs) = f x `operator` foo xs  <-- general case
   headsOf [[1,2,3],[4,5],[6]] => [1,4,6]
 
 - Bonus question: try to do it with a list comprehension?
-  
+
 ==============================================================================
 
 Recursive functions can have many arguments. Arguments that remain
@@ -136,7 +136,7 @@ call such arguments CONTEXT VARIABLES. For example:
 
 > addToList :: Num a => a -> [a] -> [a]
 > addToList _ []     = []
-> addToList n (x:xs) = x + n : addToList n xs
+> addToList n (x : xs) = x + n : addToList n xs
 
 Of course, if required, we can change the variables in each recursive call:
 
@@ -149,15 +149,16 @@ We need an extra argument to "carry" some state while we traverse the list:
 
 > incIncList :: Num a => a -> [a] -> [a]
 > incIncList _ []     = []
-> incIncList n (x:xs) = x + n : incIncList (n + 1) xs
+> incIncList n (x : xs) = x + n : incIncList (n + 1) xs
 
 To make the function more ergonimic and spare the caller from having to always
 provide 0 as the first argument, we can define a WRAPPER FUNCTION:
 
 > incIncList' :: Num a => [a] -> [a]
 > incIncList' xs = inc 0 xs
->   where inc _ []     = []
->         inc n (y:ys) = y + n : inc (n+1) ys
+>   where
+>     inc _ []     = []
+>     inc n (y : ys) = y + n : inc (n + 1) ys
 
 == EXERCISE 2 ================================================================
 
@@ -172,7 +173,7 @@ provide 0 as the first argument, we can define a WRAPPER FUNCTION:
   value of the preceding element. The first element gets no value added.
   addPredecessor :: Num a => [a] -> [a]
   addPredecessor [3,2,1] => [3,5,3]
-  
+
 ==============================================================================
 
 The recurisve case can act differently depending on additional conditions.
@@ -181,7 +182,7 @@ numbers in a list:
 
 > countPositives :: (Num a, Ord a) => [a] -> Int
 > countPositives []     = 0
-> countPositives (x:xs)
+> countPositives (x : xs)
 >  | x >= 0  = 1 + countPositives xs
 >  | otherwise = countPositives xs
 
@@ -208,7 +209,7 @@ Let's define our version of `take`:
 > take' _ [] = []
 > take' n (x : xs)
 >  | n <= 0 = []
->  | otherwise = x : take' (n -1) xs
+>  | otherwise = x : take' (n - 1) xs
 
 Does this work as expected if n < 0 (it should return an empty list)?
 
@@ -221,7 +222,7 @@ supertake 5 [1,2,3] => [1,2,3,3,3]
 > supertake n (x : xs)
 >  | n <= 0 = []
 >  | null xs = x : supertake (n - 1) [x]
->  | otherwise = x : supertake (n -1) xs
+>  | otherwise = x : supertake (n - 1) xs
 
 Of course, in the real world, we would define this function without writing our
 own recursion. We would instead use standard functions from Prelude:
@@ -260,7 +261,7 @@ Here's how the 'zip' function is defined:
 > zip' :: [a] -> [b] -> [(a, b)]
 > zip' []     _      = []
 > zip' _      []     = []
-> zip' (x:xs) (y:ys) = (x, y) : zip' xs ys
+> zip' (x : xs) (y : ys) = (x, y) : zip' xs ys
 
 How can we extend this so that it only pairs up (x,y) where x==y?
 
@@ -276,7 +277,7 @@ function that takes a list and pairs up the consecutive elements would be
 defined like this:
 
 > pairUp :: [a] -> [(a,a)]
-> pairUp (x:y:xs) = (x, y) : pairUp xs
+> pairUp (x : y : xs) = (x, y) : pairUp xs
 > pairUp _        = []
 
 == EXERCISE 5 ================================================================
@@ -305,7 +306,7 @@ Here the solution:
 
 > reverse1 :: [a] -> [a]
 > reverse1 []     = []
-> reverse1 (x:xs) = reverse1 xs ++ [x]
+> reverse1 (x : xs) = reverse1 xs ++ [x]
 
 Space complexity is O(n) but time complexity is as much as O(n^2).
 Can you say why?
@@ -317,8 +318,9 @@ Another function is 'unzip':
 
 > unzip'' :: [(a,b)] -> ([a],[b])
 > unzip'' []          = ([], [])
-> unzip'' ((x, y):zs) = (x:xs, y:ys)
->   where (xs, ys) = unzip'' zs
+> unzip'' ((x, y) : zs) = (x : xs, y : ys)
+>   where
+>     (xs, ys) = unzip'' zs
 
 == CORECURSION ===============================================================
 
@@ -336,15 +338,15 @@ as much as needed.
 > ones :: [Integer]
 > ones = 1 : ones
 
-> cycle' :: a -> [a]
-> cycle' x = x : cycle' x
+> repeat' :: a -> [a]
+> repeat' x = x : repeat' x
 
 In each step we can use a part of the already constructed structure.
 
 List of natural numbers:
 
 > nats :: [Integer]
-> nats = 0 : [n + 1 | n <- nats] 
+> nats = 0 : [n + 1 | n <- nats]
 
 A bit more complex: a list of Fibonacci Numbers:
 
