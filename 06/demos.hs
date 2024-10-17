@@ -1,4 +1,12 @@
 -- Load the lecture inside a GHCi session and try these examples out:
+-- Use the :set +s flag where appropriate
+-- flags
+-- :set +s
+
+-- show list copying
+last [1 .. 100000000]
+last $ [1] ++ [1 .. 100000000]
+last $ [1 .. 100000000] ++ [1]
 
 -- Tail vs standard recursion 1
 fact3 5
@@ -25,3 +33,6 @@ head $ incList1 [1 .. 1000000]
 sumAcc [0 .. 100]
 sumAcc [0 .. 12000000]
 sumAccStrict [0 .. 12000000]
+
+sumAcc [0 .. 15000000] -- stack overflow
+sumAccStrict [0 .. 15000000] -- works

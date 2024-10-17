@@ -58,13 +58,13 @@ case, we simply return the accumulated solution:
 
 > fact2 :: (Eq a, Num a) => a -> a -> a   -- the second arg. is the accumulator
 > fact2 0 acc = acc
-> fact2 x acc = fact2 (x-1) (x*acc)
+> fact2 n acc = fact2 (n - 1) (n * acc)
 
 To make the API more user-friendly, we can define a wrapper function that sets
 the initial value. 
 
 > fact3 :: (Eq a, Num a) => a -> a
-> fact3 x = fact2 x 1
+> fact3 n = fact2 n 1
 
 'fact3' is the function we expose to our users (we could define the inner
 'fact2' function using the 'where' clause).
@@ -74,15 +74,15 @@ All recursive functions from the previous lecture were defined with
 example, instead of:
 
 > sum1 :: Num a => [a] -> a
-> sum1 []     = 0
-> sum1 (x:xs) = x + sum1 xs
+> sum1 [] = 0
+> sum1 (current:rest) = current + sum1 rest
 
 We could write:
 
 > sum2 :: Num a => [a] -> a
-> sum2 xs = sum xs 0
->   where sum []     acc = acc
->         sum (x:xs) acc = sum xs (x + acc)
+> sum2 numbers = sum numbers 0
+>   where sum [] result = result
+>         sum (current:rest) result = sum rest (result + current)
 
 If the result of the recursive call is the final result of the function itself,
 we say that the function is TAIL RECURSIVE. If the result of the recursive call
@@ -105,7 +105,7 @@ Let's first see how tail recursion affects time complexity by looking at the
 reverse function:
  
 > reverse1 :: [a] -> [a]
-> reverse1 []     = []
+> reverse1 [] = []
 > reverse1 (x:xs) = reverse1 xs ++ [x]
 
 The time complexity of this implementation is as much as O(n^2). Can you say why?
@@ -114,7 +114,7 @@ Accumulator-style version:
 
 > reverse2 :: [a] -> [a]
 > reverse2 xs = rev xs []
->   where rev []     ys = ys
+>   where rev [] ys = ys
 >         rev (x:xs) ys = rev xs (x:ys)
 
 What is the complexity of this function?
@@ -146,8 +146,8 @@ Haskell performs nested function calls using a different evaluation strategy
 called "graph reduction." Instead of creating a new stack frame for each
 function call, this strategy constructs a nested pile of "thunks" (i.e., data
 structures pending evaluations) on the heap. For example, after reaching the
-base case of 'fact1 5', we end up with the following structure (chain of tunks)
-on the heap:
+base case of 'fact1 5', we end up with the following structure (chain of
+thunks) on the heap:
 
 5 * (4 * (3 * (2 * 1)))
 
@@ -198,7 +198,7 @@ this in a bit.
 Let's define an tail-recursive version of 'maximum'. The standard version is:
 
 > maximum1 :: Ord a => [a] -> a
-> maximum1 []  = error "empty list"
+> maximum1 [] = error "empty list"
 > maximum1 [x] = x
 > maximum1 (x:xs) = x `max` maximum1 xs
 
@@ -206,26 +206,26 @@ Tail-recursive version:
 
 > maximum2 :: (Ord a, Num a) => [a] -> a
 > maximum2 [] = error "empty list"
-> maximum2 xs = maximum xs 0
->   where maximum []     m = m
->         maximum (x:xs) m = maximum xs (max x m)
+> maximum2 list = maximum list 0
+>   where maximum [] maxSoFar = maxSoFar
+>         maximum (current:rest) maxSoFar = maximum rest (max current maxSoFar)
 
 There's actually no need to limit ourselves to the 'Num' typeclass here, so
 let's give a slightly more generic definition:
 
 > maximum3 :: (Ord a, Bounded a) => [a] -> a
 > maximum3 [] = error "empty list"
-> maximum3 xs = maximum xs minBound
->   where maximum []     m = m
->         maximum (x:xs) m = maximum xs (max x m)
+> maximum3 list = maximum list minBound
+>   where maximum [] maxSoFar = maxSoFar
+>         maximum (current:rest) maxSoFar = maximum rest (max current maxSoFar)
 
 Finally, an the best definition avoids using a bound altogether:
 
 > maximum4 :: (Ord a) => [a] -> a
 > maximum4 []     = error "empty list"
-> maximum4 (x:xs) = maximum xs x
->   where maximum []     m = m
->         maximum (x:xs) m = maximum xs (max x m)
+> maximum4 (first:rest) = maximum rest first
+>   where maximum [] maxSoFar = maxSoFar
+>         maximum (current:rest) maxSoFar = maximum rest (max current maxSoFar)
 
 Tail recursion seems like a great idea, but there is a catch we've already
 hinted at. Because Haskell is lazy, the accumulator will not be evaluated until
@@ -259,8 +259,8 @@ Sometimes, using an accumulator doesn't even make sense to begin with. One such
 example is the 'incList' function:
 
 > incList1 :: Num a => [a] -> [a]
-> incList1 []     = []
-> incList1 (x:xs) = x + 1 : incList1 xs
+> incList1 [] = []
+> incList1 (curr:rest) = curr + 1 : incList1 rest
 
 The space complexity of this function is O(1).
 
@@ -277,14 +277,14 @@ structure is '5 * (4 * (3 * (2 * (1))))', giving us a space complexity of O(n).
 Let's take a shot at implementing 'incList' using tail-recursion:
 
 > incList2 :: Num a => [a] -> [a]
-> incList2 xs = inc xs []
->   where inc []     ys = reverse ys
->         inc (x:xs) ys = inc xs ((x+1):ys)
+> incList2 numbers = inc numbers []
+>   where inc [] incremented = reverse incremented
+>         inc (curr:rest) incremented = inc rest ((curr + 1):incremented)
 
 > incList3 :: Num a => [a] -> [a]
-> incList3 xs = inc xs []
->   where inc []     ys = ys
->         inc (x:xs) ys = inc xs (ys ++ [x+1])
+> incList3 numbers = inc numbers []
+>   where inc [] incremented = incremented
+>         inc (curr:rest) incremented = inc rest (incremented ++ [curr + 1])
 
 Prepending is done in O(1), while concatenation is done in O(n) where n is the
 size of the first list. Therefore, we can choose to either:
@@ -299,9 +299,9 @@ complexity of 'incList1' was already O(1).
 Another example is 'unzip'. We may give it a try with an accumulator:
 
 > unzip' :: [(a,b)] -> ([a],[b])
-> unzip' zs = unz zs ([], [])
->   where unz []          acc      = acc
->         unz ((x, y):zs) (xs, ys) = unz zs (x:xs, y:ys)
+> unzip' zipped = unz zipped ([], [])
+>   where unz [] unzipped = unzipped
+>         unz ((x, y):restZipped) (xs, ys) = unz restZipped (x:xs, y:ys)
 
 But this again doesn't work because of the same reason: we end up with lists in
 reverse order. We could reverse the input list first, but that would require
@@ -310,7 +310,7 @@ two list traversals (one for the reversal and one for unzipping).
 Hence in this case too we should resort to "traditional" recursion:
 
 > unzip'' :: [(a,b)] -> ([a],[b])
-> unzip'' []         = ([], [])
+> unzip'' [] = ([], [])
 > unzip'' ((x, y):zs) = (x:xs, y:ys)
 >   where (xs, ys) = unzip'' zs
 
@@ -352,7 +352,7 @@ complexities:
 
   - Use guarded recursion (i.e., tail recursion modulo cons) if your result
     doesn't depend on the entire input structure and you wish to consume it
-    lazily.
+    lazily (e.g., filtering a list, processing each element into a new list).
 
 
 More on guarded recursion vs tail recursion:
@@ -390,6 +390,11 @@ LAZINESS is one possible way of implementing non-strict semantics. For example,
 non-strictness could also be implemented by running all expressions in parallel
 and throwing away unneeded results.
 
+Lazy evaluation in Haskell means that each expression is evaluated:
+ - Only when it's needed (e.g., someone wants to consume the result).
+ - Only enough (e.g., only the beggining of the list if you need head).
+ - Only once (e.g., evaluation replaces the thunk with the result).
+
 Therefore, saying that Haskell is a non-strict lazy language means that Haskell
 features non-strict semantics implemented via lazy evaluation. In practice,
 this means that Haskell won't evaluate an expression until someone asks for the
@@ -411,14 +416,14 @@ evaluation becomes problematic. For example, we absolutely need lazy evaluation
 for this to work:
 
 > filterOdd :: [a] -> [a]
-> filterOdd xs = [x | (i, x) <- zip [0..] xs, odd i]
+> filterOdd numbers = [n | (i, n) <- zip [0..] numbers, odd i]
 
 On the other hand, recall the sum function:
 
 > sumAcc :: Num a => [a] -> a
-> sumAcc xs = sum xs 0
->   where sum []     s = s             
->         sum (x:xs) s = sum xs (x + s)
+> sumAcc numbers = sum numbers 0
+>   where sum [] sumSoFar = sumSoFar
+>         sum (n:rest) sumSoFar = sum rest (sumSoFar + n)
 
 > e2 = sumAcc [0..100]
 > e3 = sumAcc [0..1000000000]
@@ -464,9 +469,9 @@ For example:
 We can now define a strict version of sumAcc:
 
 > sumAccStrict :: Num a => [a] -> a
-> sumAccStrict xs = sum xs 0
->   where sum []     s = s             
->         sum (x:xs) s = let a = x + s in a `seq` sum xs a
+> sumAccStrict numbers = sum numbers 0
+>   where sum [] sumSoFar = sumSoFar
+>         sum (n:rest) sumSoFar = let tmp = sumSoFar + n in tmp `seq` sum rest tmp
   
 > e7 = sumAccStrict [0..1000000000]
 
