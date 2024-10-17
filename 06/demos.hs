@@ -21,18 +21,26 @@ reverse1 [1 .. 2000000]
 reverse2 [1 .. 2000000]
 
 -- Prepend vs append list
-incList2 [1 .. 1000000]
-incList3 [1 .. 1000000]
+incList2 [1 .. 2000000]
+incList3 [1 .. 2000000]
 
 -- Tail vs Guarded recursion
-head $ incList2 [1 .. 1000000]
-head $ incList3 [1 .. 1000000]
-head $ incList1 [1 .. 1000000]
+-- Execute with :set +s
+head $ incList2 [1 .. 2000000]
+head $ incList3 [1 .. 2000000]
+head $ incList1 [1 .. 2000000]
+
+-- Show laziness
+-- With :set +s
+head $ [1 .. 10] ++ [1]
+head $ [1 .. 100000000] ++ [1]
+head $ [1 ..] ++ [1]
 
 -- Strict vs non-strict tail recursion (make sure to monitor system memory).
+-- Monitor memory to see what's going on
 sumAcc [0 .. 100]
-sumAcc [0 .. 12000000]
-sumAccStrict [0 .. 12000000]
+sumAcc [0 .. 15000000]
+sumAccStrict [0 .. 15000000]
 
-sumAcc [0 .. 15000000] -- stack overflow
+sumAcc [0 .. 20000000] -- stack overflow
 sumAccStrict [0 .. 15000000] -- works

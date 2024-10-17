@@ -195,63 +195,26 @@ and 'sum2' have a space complexity of O(1). Once again, this is actually a soft
 lie. The full truth is: They would be O(1) if they weren't lazy. We'll explore
 this in a bit.
 
-Let's define an tail-recursive version of 'maximum'. The standard version is:
+Here's a standard version of a `listMaximum` function.
 
-> maximum1 :: Ord a => [a] -> a
-> maximum1 [] = error "empty list"
-> maximum1 [x] = x
-> maximum1 (x:xs) = x `max` maximum1 xs
-
-Tail-recursive version:
-
-> maximum2 :: (Ord a, Num a) => [a] -> a
-> maximum2 [] = error "empty list"
-> maximum2 list = maximum list 0
->   where maximum [] maxSoFar = maxSoFar
->         maximum (current:rest) maxSoFar = maximum rest (max current maxSoFar)
-
-There's actually no need to limit ourselves to the 'Num' typeclass here, so
-let's give a slightly more generic definition:
-
-> maximum3 :: (Ord a, Bounded a) => [a] -> a
-> maximum3 [] = error "empty list"
-> maximum3 list = maximum list minBound
->   where maximum [] maxSoFar = maxSoFar
->         maximum (current:rest) maxSoFar = maximum rest (max current maxSoFar)
-
-Finally, an the best definition avoids using a bound altogether:
-
-> maximum4 :: (Ord a) => [a] -> a
-> maximum4 []     = error "empty list"
-> maximum4 (first:rest) = maximum rest first
->   where maximum [] maxSoFar = maxSoFar
->         maximum (current:rest) maxSoFar = maximum rest (max current maxSoFar)
-
-Tail recursion seems like a great idea, but there is a catch we've already
-hinted at. Because Haskell is lazy, the accumulator will not be evaluated until
-someone requests it. It will instead gradually grow on the heap, causing a
-MEMORY LEAK. Therefore, using accumulators only makes sense if they are STRICT.
+> listMaximum :: Ord a => [a] -> a
+> listMaximum [] = error "empty list"
+> listMaximum [x] = x
+> listMaximum (x:xs) = x `max` listMaximum xs
 
 == EXERCISE 1 ================================================================
 
 1.1.
-- Write an accumulator-style recursive definition of
-  length' :: [a] -> Int
 
-1.2
-- Write an accumulator-style recursive definition of maxUnzip. If you know how
-  to implement it, choose the most general signature:
-    maxUnzip :: [(Int, Int)] -> (Int, Int)
-    maxUnzip :: (Ord a, Ord b, Bounded a, Bounded b) => [(a, b)] -> (a, b)
-    maxUnzip :: (Ord a, Ord b) => [(a, b)] -> (a, b)
-  that returns the maximum element at the first position and the maximum
-  element at the second position in a pair, i.e., it's equivalent to:
-    maxUnzip zs = (maximum xs, maximum ys)
-      where (xs,ys) = unzip zs
-    maxUnzip [(1,2), (2,3), (10,2)] => (10, 3)10
-  If the list is empty, return an "empty list" error.
-        error "empty list"
-- Now write a standard recursive definition (without an accumulator).
+- Define a tail recursive version of `listMaximum` called `tailMaximum`.
+
+  Is your function less polymorphic than non-tail recursive `listMaximum`?
+  Which calls can you make, and which calls throw compile errors:
+    tailMaximum [1..10]
+    tailMaximum "haskell"
+    tailMaximum ["one", "two", "three"]
+
+  Compare that with `listMaximum`.
 
 == GUARDED RECURSION ==========================================================
 
@@ -342,6 +305,8 @@ https://hackage.haskell.org/package/base-4.17.0.0/docs/src/GHC.Base.html#%2B%2B
 The expression 'plusplus l1 l2' starts producing values immediately, there's no
 need to wait for the function to reach its base case before we start consuming
 its return value.
+
+> listHead = head $ [1..10000000] ++ [1..10000000]
 
 SUMMARY:
 Tail recursion and guarded recursion can reduce a function's space and time
@@ -505,6 +470,19 @@ http://hackage.haskell.org/package/deepseq
 
 OPTIONAL: Read more on 'seq':
   - https://stackoverflow.com/questions/66943741/what-does-seq-actually-do-in-haskell
+
+
+== EXERCISE 2 ================================================================
+
+2.1.
+
+- Define a strict verion of of `tailMaximum`. Compare its memory footprint to the
+  non-strict version on large inputs:
+      :set +s 
+      tailMaximumStrict [1..1000000]
+      tailMaximum [1..1000000]
+
+===============================================================================
 
 SUMMARY:
 
