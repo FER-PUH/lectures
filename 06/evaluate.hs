@@ -29,6 +29,3 @@ main = do
   print len
   print len
   print len
-
--- ghc evaluate.hs -o normal
--- ghc -O evaluate.hs -o optimized
