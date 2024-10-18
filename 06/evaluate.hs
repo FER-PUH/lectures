@@ -1,7 +1,7 @@
 import Data.List (length)
 
 -- Try compiling with ghc
--- ghc -O evaluate.hs -o normal
+-- ghc evaluate.hs -o normal
 -- ghc -O evaluate.hs -o optimized
 -- ./normal
 -- ./optimizied
