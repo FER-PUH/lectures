@@ -14,16 +14,67 @@ v1.0
 
 ==============================================================================
 
+> import Data.Tuple hiding (curry, uncurry)
 > import Data.Char
-> import Prelude hiding (map, filter)
+> import Prelude hiding (map, filter, curry, uncurry)
 > import Data.List hiding (map, filter)
 
 === RECAP ====================================================================
 
 Last week we talked about recursion. It turns out that there are a number of
-ubiquitous recursion patterns, which can be abstracted into so-called FUNCTIONAL
-IDIOMS using higher-order functions. We'll look into that today. First off,
-let's reveal the truth about multi-argument function in Haskell.
+ubiquitous recursion patterns, which can be abstracted into so-called 
+FUNCTIONAL IDIOMS using higher-order functions. We'll look into that today. 
+
+=== LAMBDA EXPRESSIONS =======================================================
+
+In Haskell, functions are first-class citizens, meaning they can be passed 
+as arguments to other functions, returned as results, and assigned to 
+variables—just like any other data type, such as numbers or lists.
+
+With lambda expressions we can define ANONYMOUS FUNCTIONS. Anonymous functions
+are functions that we only need once. Because we only need them once, we can
+just as well define them exactly there where we need them, and we don't even
+need to give them a name.
+
+Instead of
+
+  myFunction x = x + 5
+
+we can write
+
+  \x -> x + 5
+
+and that's an anonymous function. Which means that in ghci we can do:
+
+> myFunction x = x + 5
+
+and then apply an argument to the function like so:  
+
+myFunction $ 2
+
+or like so:  
+
+(\x -> x + 5) $ 2
+
+We can give a name to an anonymous function
+
+> addFive = \x -> x + 5
+
+but this, obviously, makes little sense.
+
+However this is in fact how haskell desugars the 'foo' function. 
+
+Lambdas can take any number of arguments so lets say we have the following 
+function:
+
+> add x y = x + y
+
+this gets desugared to 
+
+> desugaredAdd = \x y -> x + y
+
+But this isnt even its final form, which brings us into the next section, 
+curried functions.
 
 === CURRIED FORM =============================================================
 
@@ -52,6 +103,19 @@ Similarly, a function for concatenating three strings:
 > concatThree :: String -> (String -> (String -> String))
 > concatThree s1 s2 s3 = s1 ++ s2 ++ s3
 
+This may be more clear if we desugar the function
+
+concatThree = \s1 s2 s3 -> s1 ++ s2 ++ s3
+concatThree = \s1 -> (\s2 s3 -> s1 ++ s2 ++ s3)
+concatThree = \s1 -> (\s2 -> (\s3 -> s1 ++ s2 ++ s3))
+
+concatThree :: String -> String -> String -> String
+concatThree  = \s1    ->(\s2    ->(\s3    -> s1 ++ s2 ++ s3)) 
+
+Writing functions in curried form would be cumbersome, thats why we have
+the syntax sugar :)  !
+                 
+
 As per convention, the operator '->' in a type signature is RIGHT ASSOCIATIVE.
 This means that, if we drop the parentheses, they group to the right. So:
 
@@ -74,6 +138,8 @@ is equivalent to
 To remember:
 * operator '->' in a type signature is RIGHT associative
 * function application is LEFT associative
+
+
 
 === PARTIAL APPLICATION ======================================================
 
@@ -114,13 +180,13 @@ In lambda calculus, this is called ETA REDUCTION.
 
 Note that, because of partial function application, the order with which the
 arguments are defined is relevant. You should order the arguments so to
-make it possible to define more specific functions. The first arguments should
-be those that vary the least, i.e., arguments for which we expect that the user
-would like to have them fixed.
+make it possible to define more specific functions. The first arguments 
+should be those that vary the least, i.e., arguments for which we expect 
+that the user would like to have them fixed.
 
-Also note that partially applied functions cannot be shown. A partially applied
-function is still a function, and functions are not members of the Show
-typeclass.
+Also note that partially applied functions cannot be shown. A partially 
+applied function is still a function, and functions are not members of 
+the Show typeclass.
 
 === SECTIONS =================================================================
 
@@ -131,6 +197,7 @@ either side:
 
 > addTwo = (+2)
 > halve  = (/2)
+> divideTwoBy = (2/)
 > is42   = (==42)
 > lessThanTwo = (<2)
 > aMillionOrMore = (>=1000000)
@@ -151,7 +218,8 @@ We can do the same with binary functions that are not defined as operators:
  
 === EXERCISE 1 ===============================================================
 
-Define the following functions using partial application of existing functions:
+Define the following functions using partial application of existing 
+functions:
 
 1.1.
 - Function 'takeThree' that takes the first three elements from a list.
@@ -201,16 +269,29 @@ We've already defined some of higher-order functions. Here is a couple more:
 
 What about functions that return function?
 
-Recall: because of currying, every function of two or more arguments is in fact
-returning a function! For example:
+Recall: because of currying, every function of two or more arguments is in 
+fact returning a function! For example:
 
 > addThree :: Num a => a -> a -> a -> a   -- or: a -> (a -> (a -> a))
 > addThree x y z = x + y + z
 
-=== EXERCISE 2 ================================================================
+But here is a more concrete example:
+
+A pair of functions imported from 'Data.Tuple'.
+
+> curry :: ((a, b) -> c) -> a -> b -> c
+> curry f a b = f (a,b)
+
+> uncurry :: (a -> b -> c) -> (a, b) -> c
+> uncurry f (a,b) = f a b 
+
+> uncurryPlus = uncurry (+)
+> regularPlus = curry uncurryPlus
+
+=== EXERCISE 2 ==============================================================
 
 2.1.
-- Define 'applyOnLast f xs ys' that applies a binary function 'f' on the last 
+- Define 'applyOnLast f xs ys' that applies a binary function 'f' on the last
   element of 'xs' and the last element of 'ys'.
   applyOnLast (+) [1,2,3] [5,6] => 9
   applyOnLast max [1,2] [3,4] => 4
@@ -219,11 +300,12 @@ returning a function! For example:
   lastTwoPlus100 [1,2,3] [6,5] => 108
 
 2.2.
-- Define 'applyManyTimes n f x' that applies 'n' times function 'f' to argument
-  'x'. If n<=0, return 'x' unaltered.
+- Define 'applyManyTimes n f x' that applies 'n' times function 'f' to 
+  argument 'x'. If n<=0, return 'x' unaltered.
   applyManyTimes 5 (+2) 0 => 10
   applyManyTimes 3 finishSentence "hm" => "hm..."
-- Using this function, define 'applyTwice''
+- Using 'applyManyTimes', define 'applyTwice'
+
 
 === MAP =======================================================================
 
@@ -251,8 +333,8 @@ functions:
 > map f (x:xs) = f x : map f xs
 
 We've just defined one of the most common functional idiom (design pattern)!
-In fact, function 'map' is so commonly used that it is defined in the standard
-library.
+In fact, function 'map' is so commonly used that it is defined in the 
+standard library.
 
 We can now use 'map' and our knowledge of higher-order functions and sections
 to elegantly define the following functions:
@@ -261,7 +343,8 @@ to elegantly define the following functions:
 > uppercaseString' = map toUpper
 > addToList' n = map (+n)
 
-Note that, being real Haskellers, we've eta reduced the definitions right away!
+Note that, being real Haskellers, we've eta reduced 
+the definitions right away!
 
 With 'map' we can do things for which we previously needed list comprehensions.
 
@@ -352,28 +435,7 @@ Define the following functions using 'map' and 'filter':
   freqFilter :: Eq a => Int -> [a] -> [a]
   freqFilter 4 "kikiriki" => "iiii"
 
-=== LAMBDA EXPRESSIONS ========================================================
-
-With lambda expressions we can define ANONYMOUS FUNCTIONS. Anonymous functions
-are functions that we only need once. Because we only need them once, we can
-just as well define them exactly there where we need them, and we don't even
-need to give them a name.
-
-Instead of
-
-  foo x = x + 5
-
-we can write
-
-  \x -> x + 5
-
-and that's an anonymous function.
-
-We can give a name to an anonymous function
-
-  foo = \x -> x + 5
-
-but this, obviously, makes little sense.
+=== MORE ON LAMBDA EXPRESSIONS ================================================
 
 We often use lambda expressions when applying a higher-order function. For
 example, instead of
@@ -438,25 +500,24 @@ but this only makes the code less readable.
 
 === EXERCISE 5 ================================================================
 
-Define the following functions using lambda expressions:
-
 5.1.
 - Define a function 'withinInterval n m xs' that filters from list 'xs' all
   elements that fall within the [n,m] interval.
 
-5.2.
-- Define 'sndColumn m' that returns the second column of matrix 'm',
-  represented as a list of lists.
-  sndColumn [[a]] -> [a]
-  sndColumn [[1,2,3],[4,5,6]] => [2,5]
-
-5.3.
+5.2
 - Define 'canoinicalizePairs' that takes a list of pairs and returns a list of
   pairs with the order of elements switched so that the first element of the
-  pair is smaller than the second one. If the elements are equal, the pair is
-  discarded. 
+  pair is smaller than the second one. Filter out any pair that has the
+  first element equal to the second element
   canonicalizePairs :: Ord a => [(a, a)] -> [(a, a)]
-  canonicalizePairs [(4,1),(2,2),(1,5)] => [(1,4),(1,5)]
+  canonicalizePairs [(4,1), (2,2), (1,5)] => [(1,4), (1,5)]
+
+5.3
+- Define 'applyAndCombine': a function that takes two unary functions, applies 
+  some input to them returns and combines the results into a result pair.
+  applyAndCombine :: (a -> b) -> (a -> c) -> a -> (b, c)
+  applyAndCombine (+2) (*3) 5 => (7, 15)
+
 
 === NEXT =====================================================================
 
