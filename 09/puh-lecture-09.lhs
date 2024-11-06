@@ -16,7 +16,6 @@ v1.0
 > {-# OPTIONS_GHC -Wno-missing-fields #-}
 >
 > import Data.List
-> import ExtraStuff
 
 === RECAP ====================================================================
 
@@ -29,7 +28,7 @@ recursive types. Today, we start looking into custom data types.
 
 === DATA TYPES ===============================================================
 
---> data Tricolor = Red | Green | Blue
+> data Tricolor = Red | Green | Blue
 
 'Tricolor' is a new type. 'Red', 'Green', and 'Blue' are DATA CONSTRUCTORS
 The names of types and data constructors are capitalized.
@@ -69,12 +68,14 @@ What happens if we try to evaluate the value of 'myColor' in ghci?
 The value cannot be shown because its type is not a member of the 'Show' type
 class. We can fix this easily:
 
-> data Tricolor = Red | Green | Blue
+> data Tricolor' = Red' | Green' | Blue'
 >  deriving Show
 
-This makes the 'Tricolor' type a member of the 'Show' type class (more
+This makes the `Tricolor'` type a member of the 'Show' type class (more
 precisely, it automatically derives an instance of the 'Show' class for this
 type).
+
+> myColor' = Red'
 
 IMPORTANT: Data constructors must be unique! The same data constructor cannot
 be used to define different types. This won't work:
@@ -101,8 +102,6 @@ and the radius). 'Rectangle' is a quaternary constructor: it takes four numbers
 This reveals that data constructors are actually functions. What is the type of
 the 'Circle' constructor?
 
-  Circle :: Double -> Double -> Double -> Shape
-
 We can also pattern match against constructors with multiple arguments:
 
 > isCircle :: Shape -> Bool
@@ -126,7 +125,7 @@ A function to compute the area of a shape:
 
 > area :: Shape -> Double
 > area (Circle _ _ r)          = r ^ 2 * pi
-> area (Rectangle x1 y1 x2 y2) = (abs $ x1 - x2) * (abs $ y1 - y2)
+> area (Rectangle x1 y1 x2 y2) = abs $ (x1 - x2) * (y1 - y2)
 
 Because data constructors 'Circle' and 'Rectangle' give values of the same
 type, those values can be combined in a single list:
@@ -157,7 +156,7 @@ totally OK (and in fact common for types with only one data constructor).
 > area2 :: Shape2 -> Double
 > area2 (Circle2 _ r) = r ^ 2 * pi
 > area2 (Rectangle2 (Point x1 y1) (Point x2 y2)) =
->   (abs $ x1 - x2) * (abs $ y1 - y2)
+>   abs $ (x1 - x2) * (y1 - y2)
 
 === EXERCISE 1 ===============================================================
 
@@ -175,10 +174,10 @@ showDate :: Date -> String
 1.3.
 - Write a function 'inShape' that tests whether a point is contained within a
   given shape (or is on its border).
-  inShape :: Shape2 -> Point -> Bool
+  inShape :: Point -> Shape2 -> Bool
 - Write a function 'inShapes' that tests if the point is within any shape from
   the list of shapes.
-  inShapes :: [Shape2] -> Point -> Bool
+  inShapes :: Point -> [Shape2] -> Bool
 
 1.4.
 - Define your type 'Vehicle' that can be a 'Car', 'Truck',
@@ -233,13 +232,13 @@ Let's define a function to show some data from the record:
 or
 
 > showStudent2 :: Student -> String
-> showStudent2 s = intercalate " " [studentId s, firstName s, lastName s]
+> showStudent2 s = unwords [studentId s, firstName s, lastName s]
 
 We can also define it like this:
 
 > showStudent3 :: Student -> String
 > showStudent3 (Student {studentId=id, firstName=f, lastName=l}) =
->   intercalate " " [id, f, l]
+>   unwords [id, f, l]
 
 Let's write a function to select students whose average grade is above a given
 threshold:
@@ -290,14 +289,14 @@ We can define a record in a shorter way, respecting the order of the fields:
 2.3.
 - Write a function that returns a list of matriculation numbers for a given
   study level, sorted by average grade in descending order.
-  rankedStudents :: Level -> [Students] -> [String]
+  rankedStudents :: Level -> [Student] -> [String]
 
 2.4.
 - Write a function
   addStudent :: Student -> [Student] -> [Student]
   that adds a student to a list of students. If a student with an identical
-  matriculation number already exists in the list, the function should return an
-  error.
+  matriculation number already exists in the list, the function should return
+  an error.
 
 === PARAMETRIZED TYPES =======================================================
 
@@ -420,8 +419,7 @@ We return 'Right b' is there was no error, otherwise we return 'Left a', where
   that converts a 'MyTriplet' value into an ordinary triplet.
 
 3.2.
-- Define a function (Employee - salary :: Maybe Double, name :: String) deriving Show
-  totalSalaries :: [Employee] -> Double
+- Define a function totalSalaries :: [Employee] -> Double
   that sums the known salaries of employees (salaries that are not 'Nothing').
 
 3.3.
