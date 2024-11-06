@@ -7,9 +7,9 @@ Academic Year 2022/2023
 
 LECTURE 8: Higher-order functions 2
 
-v1.1
+v1.4
 
-(c) 2017 Jan Šnajder, 2022/2023 Filip Sodić
+(c) 2017 Jan Šnajder, 2022/2023/2024 Filip Sodić
 
 ===============================================================================
 
@@ -65,8 +65,8 @@ Recall the 'caesarCode' function. Let's look at three ways how to define it:
 > caesarCode3 :: String -> String
 > caesarCode3 = map succ . filter (/=' ')
 
-Which one is the best? Definitively the third one. Beginners may resort to the
-first one. The second one is the worst choice here.
+Which one is the best? Probably the third one. Beginners may resort to the
+first one. The second one is the probably the worst choice here.
 
 A couple of other functions defined in previous lectures:
 
@@ -87,6 +87,8 @@ So, we can define a chain of compositions. For instance,
 > wordSort :: String -> String
 > wordSort = unwords . sort . words
 
+> sortedWords = wordSort "Composing almost like Mozart"
+
 Keep in mind that in such a chain the functions are applied from right to left!
 
 What if we want to define a composition of functions that don't take the same
@@ -98,17 +100,23 @@ accomplish this type matching by partially applying functions in the
 compositional chain, as in the following example:
 
 > initials :: String -> String
-> initials = map toUpper . map head . words
+> initials = (map toUpper) . (map head) . words
+
+> player = initials "Carl Johnson"
 
 A prettier way to define this:
 
 > initials2 :: String -> String
 > initials2 = map (toUpper . head) . words
 
+> president = initials2 "John Fitzgerald Kennedy"
+
 Sections come in very handy here:
 
 > incrementPositives :: [Integer] -> [Integer]
 > incrementPositives = map (+1) . filter (>0)
+
+> incremented = incrementPositives [1, -2, 3, -4, 5]
 
 One more example:
 
@@ -116,14 +124,11 @@ One more example:
 > tokenize =
 >   filter (\w -> length w >= 3) . words . map toUpper
 
+> tokens1 = tokenize "This are my tokens"
+
 A better way to define the same:
 
 > tokenize' = filter ((>=3) . length) . words . map toUpper
-
-One last example:
-
-> foo :: Ord a => [a] -> [(a, Int)]
-> foo = map (\xs@(x:_) -> (x, length xs)) . group . sort
 
 Note that we managed to avoid mentioning any arguments of functions (the
 variables). This style of programming is called POINTFREE STYLE.
@@ -143,12 +148,35 @@ can easily get out of hand :). Here's a general rule of thumb:
 Sometimes it's useful to explicitly write and name an argument (even for unary
 functions) for documentation purposes.
 
+When we cannot define the entire function in a pointfree style (as is the case
+below), it can still be nice to define some parts of it in pointfree style.
+
+> studentsPassed :: [(String, Int)] -> [String]
+> studentsPassed students = map fst $ filter didPass students
+>  where
+>    didPass = (>= halfOfMaxScore) . snd
+>    halfOfMaxScore = maxScore `div` 2
+>    maxScore = maximum $ map snd students
+
+Don't confuse composition operator with the application operator ('$'). The '$'
+operator applies the expression on the left to the expression on the right. It
+has the lowest precedence and is right-associative:
+
+  ($) :: (a -> b) -> a -> b
+  f $ x = f x
+
 === EXERCISE 1 ================================================================
 
 Define the following functions using composition and/or pointfree style (you
 may of course use local definitions):
 
 1.1.
+- Define 'sumEven' that adds up elements occurring at even (incl. zero)
+  positions in a list.
+  sumEven :: Num a => [a] -> a
+  sumEven [1..10] => 25
+
+1.2.
 - Define 'applyAll' that takes a value and an array of functions. It applies
   all functions in the array to the given value:
   element:
@@ -156,46 +184,58 @@ may of course use local definitions):
   applyAll 10 [succ, (+5), (^2)] => [11, 15, 100]
   applyAll "123" [length, read] => [3, 123]
 
-
-1.2.
-- Define 'sumEven' that adds up elements occurring at even (incl. zero)
-  positions in a list.
-  sumEven :: Num a => [a] -> a
-  sumEven [1..10] => 25
-
 1.3.
-- Define 'filterWords ws s' that removes from string 's' all words contained
-  in the list 'ws'.
-  filterWords :: [String] -> String -> String
-  filterWords ["the", "over"] "the quick brown fox jumps over the lazy dog"
-      => "quick brown fox jumps lazy dog"
+- Define the "pipe" operator that behaves like a shell pipe in bash (takes a
+  value from the left and pipes it to the function on the right):
+  It is left-associative by default, so no need to worry about that.
 
-1.4.
-- Define `clamp minValue maxValue xs` that clamps a list of values between the
-  given range:
-  clamp:: (Ord a, Num a) => a -> a -> [a] -> [a]
-  clamp 3 7 [0..10] => [3, 3, 3, 4, 5, 6, 7, 7, 7, 7]
+  Examples for testing:
 
-1.5.
-- Define 'initials3 d p s' that takes a string 's' and turns it into a string
-  of initials. The function is similar to 'initials2' but additionally delimits
-  the initials with string 'd' and discards the initials of words that don't
-  satisfy the predicate 'p'.
-  initials3 :: String -> (String -> Bool) -> String -> String
-  initials3 "." (/="that") "a company that makes everything" => "A.C.M.E."
+  -- A simple one:
+  "Marko" |> head => 'M'
+
+  -- Counting the words in a sentence:
+  "I am piping stuff like a pro!" |> words |> length => 7
+
+  -- Finding the sum of all odd squares of of numbers from 1 to 5:
+  [1..5] |> map (^2) |> filter odd |> sum  => 35
+
 
 === FUNCTIONS USEFUL FOR COMPOSITION ==========================================
 
-
-In Haskell, it's always wise to place the thing you're "updating" (in this
-case, the balance) as the last argument, as it better aligns with most use
-cases. The same goes for all curried languages, not just Haskell. Read more
+In Haskell, it's always wise to place the argument you're transforming (the
+"subject" of the operation) as the last argument, as it better aligns with most
+use cases. The same goes for all curried languages, not just Haskell. Read more
 about it here:
   - http://wiki.haskell.org/Parameter_order
   - https://stackoverflow.com/a/31738041
 
-Still, sometimes functions don't neatly fit what we're trying to do. When this
-happens, we use helper functions:
+Desining functions this way (configuration first, subject last) increases the
+chances that their partial application yeilds something useful.
+
+Think about what's a more common use case:
+ 1. Filtering different data sets according to a fixed criteria (e.g., removing
+ swear words from different pieces of text).
+ 2. Filtering a fixed dataset according to different criteria (e.g., filtering
+ the same specific list of words by different criteria).
+
+It's the first one. Here are some more examples:
+
+> removeSpaces :: String -> String
+> removeSpaces = filter (/=' ')
+
+> type Name = String
+> type Age = Int
+> type Person = (String, Int)
+>
+> getAdults :: [Person] -> [Person]
+> getAdults = filter ((>=18) . snd)
+
+You can notice the same trend in other list functions: `take`, `drop`,
+`map`, `repeat`...
+
+That said, we still sometimes encounter functions that don't neatly fit what
+we're trying to do. When this happens, we use helper functions:
 
 > flip :: (a -> b -> c) -> b -> a -> c
 > flip f x y = f y x
@@ -207,6 +247,10 @@ We could have done the same thing with a section. The above is equivalent to:
 
 > sortIndex' :: Ord a => [a] -> [Int]
 > sortIndex' = map snd . sort . (`zip` [0..])
+
+Dealing with tuples is another common composition hurdle.
+What do we do if we have a normal (curried) function, but we want to map over
+an array of tuples.
 
 The 'curry' function takes a function that expects a pair and returns a
 function in curried form:
@@ -247,28 +291,18 @@ Or this (although less elegant):
 
 > maxPairedSum' xs ys = maximum . map (uncurry (+)) $ zip xs ys
 
-Even when we cannot define a function in a pointfree style, we try at least to
-define some parts of it in pointfree style:
-
-> getRowsWithMaximum :: [[Int]] -> [Int]
-> getRowsWithMaximum xs = map fst . filter (elem m . snd) $ zip [0..] xs
->   where m = maximum $ map maximum xs
-
-In the above example, we need to have 'xs' as an explicit argument in order to
-be able to refer to it later.
-
 === EXERCISE 2 ================================================================
 
-Use composition helper functions (e.g., flip and uncurry) to solve these
+Use composition helper functions (e.g., curry, uncurry, flip) to solve these
 exercises without using lambdas.
 
 2.1.
-- Define applyTuples that takes a list of tuples, each containing a function
+- Define `applyPairs` that takes a list of tuples, each containing a function
   (first element) and its argument (second element) and returns a list of
   results it got by applying the functions to arguments:
 
-  applyTuples :: [((a -> b), a)] -> [b]
-  applyTuples [((^3), 2), ((*2), 3), ((succ . succ), 1)] => [8,6,3]
+  applyPairs :: [(a -> b, a)] -> [b]
+  applyPairs [((^3), 2), ((*2), 3), ((succ . succ), 1)] => [8,6,3]
 
 2.2.
 - Define 'maxDiff xs' that returns the maximum difference between
@@ -276,15 +310,6 @@ exercises without using lambdas.
 
   maxDiff :: [Int] -> Int
   maxDiff [1, 6, 3, 5, 1] => 4
-
-2.3.
-- Define 'studentsPassed' that takes as input a list [(NameSurname, Score)] and
-  returns the names of all students who scored at least 50% of the maximum
-  score.
-
-  studentsPassed :: [(String, Int)] -> [String]
-  studentsPassed [("Tommy", 90), ("Mark", 42), ("Lisa", 48)]
-    => ["Tommy","Lisa"]
 
 
 === USEFUL HIGHER-ORDER FUNCTIONS =============================================
@@ -340,22 +365,11 @@ exercises:
   isTitleCased "University Of Zagreb" => True
 
 3.2.
-- Define 'sortPairs' that sorts the list of pairs in ascending order with
-  respect to the second element of a pair.
+- Define 'getFilename' that extracts the the name of the file from a file path.
+  Hint: Focus on readability, not on efficency.
 
-3.3.
-- Define 'filename' that extracts the the name of the file from a file path.
-  Hint: focus on readability, not on efficency
-
-  filename :: String -> String
-  filename "/etc/init/cron.conf" => "cron.conf"
-
-3.4. -- Extra
-- Define 'maxElemIndices' that returns the indices of the maximum element in a
-  list. Return "empty list" error if the list is empty.
-
-  maxElemIndices :: Ord a => [a] -> [Int]
-  maxElemIndices [1, 3, 4, 1, 3, 4] => [2, 5]
+  getFilename :: String -> String
+  getFilename "/etc/init/cron.conf" => "cron.conf"
 
 === FOLD ======================================================================
 
@@ -428,7 +442,7 @@ Here's how you can visualize it:
 
 Now, how can we define 'sum' and 'length' using 'foldr'?
 
-> sum2 = foldr (\x acc -> x + acc) 0
+> sum2 = foldr (\curr acc -> curr + acc) 0
 
 > length2 = foldr (\_ acc -> acc + 1) 0
 
@@ -436,7 +450,12 @@ Shorter (as always, don't use lambdas unless you have to):
 
 > sum3 = foldr (+) 0
 
+Remember, `const` is a function that always returns its first argument:
+
 const x y = x
+
+It's a perfect fit for calculating a list's length (since we want to ignore
+the element and always return 1):
 
 > length3 = foldr (const (+1)) 0
 
@@ -667,35 +686,22 @@ You have three folds at your disposal (foldr and foldr1, foldl and foldl1,
 foldl' and foldl1'). Choose wisely!
 
 4.1.
-- Choose the correct fold to implement `elem`.
-  Which fold is the best fit and why? Test your function on a large list.
+- Choose the correct fold to implement a function that checks whether
+  the element is in a list (same behaviour as `elem` from Prelude).
+  Which fold is the best fit and why? Hint: test it on large and inifite lists.
+  myElem :: Eq a => a -> [a] -> Bool
 
 4.2.
 - Choose the correct fold to implement:
-  reverse' :: [a] -> [a]
+  myReverse :: [a] -> [a]
   Which fold is the best fit and why? Try calling your function on a large
   lists.
 
 4.3.
 - Choose the correct fold to implement the function 'sumEven' from problem 1.2.
   Which fold is the best fit and why?
-
-4.4.
-- Choose the correct fold to implement `nubRuns`, a function that removes
-  consecutively repeated elements from a list:
-  nubRuns :: Eq a => [a] -> [a]
-  nubRuns "Mississippi" => "Misisipi"
-  Which fold is the best fit and why?
-
-4.5.
-- Chose the correct fold to imlement:
-  maxUnzip :: (Ord a, Ord b) => [(a, b)] -> (a, b)
-  It returns the maximum element at first position in a pair and maximum
-  element at second position in the pair. In other words, the function should
-  be equivalent to:
-    maxUnzip zs = (maximum xs, maximum ys)
-      where (xs,ys) = unzip zs
-  Return "empty list" error if the list is empty.
+  sumEven :: Num a => [a] -> a
+  sumEven [1..10] => 25
 
 == NEXT =======================================================================
 
@@ -704,3 +710,48 @@ integers, doubles, lists, tuples...). Next time we'll start defining our own
 custom data types. They'll bring us a step closer to solving real-world
 problems and demonstrate serveral other reasons that make Haskell's type system
 so powerful.
+
+=== EXTRA EXERCISES ===========================================================
+
+1.4.
+- Define 'filterWords words string' that removes from string 'string' all words
+  contained in the list 'words'.
+  filterWords :: [String] -> String -> String
+  filterWords ["the", "over"] "the quick brown fox jumps over the lazy dog"
+      => "quick brown fox jumps lazy dog"
+
+1.5.
+- Define `clamp minValue maxValue xs` that clamps a list of values between the
+  given range:
+  clamp:: (Ord a, Num a) => a -> a -> [a] -> [a]
+  clamp 3 7 [0..10] => [3, 3, 3, 4, 5, 6, 7, 7, 7, 7]
+
+1.6.
+- Define 'initials3 delimiter pred str' that takes a string 'str' and
+  turns it into a string of initials. The function is similar to 'initials2'
+  but additionally delimits the initials with string 'delimiter' and discards
+  the initials of words that don't satisfy the predicate 'pred'.
+  initials3 :: String -> (String -> Bool) -> String -> String
+  initials3 "." (/="that") "a company that makes everything" => "A.C.M.E."
+
+3.3.
+- Define 'sortPairs' that sorts the list of pairs in ascending order with
+  respect to the second element of a pair. Choose the most general type
+  signature.
+
+3.4. -- Extra
+- Define 'maxElemIndices' that returns the indices of the maximum element in a
+  list. Return "empty list" error if the list is empty.
+
+  maxElemIndices :: Ord a => [a] -> [Int]
+  maxElemIndices [1, 3, 4, 1, 3, 4] => [2, 5]
+
+4.4.
+- Chose the correct fold to imlement:
+  maxUnzip :: (Ord a, Ord b) => [(a, b)] -> (a, b)
+  It returns the maximum element at first position in a pair and maximum
+  element at second position in the pair. In other words, the function should
+  be equivalent to:
+    maxUnzip zs = (maximum xs, maximum ys)
+      where (xs,ys) = unzip zs
+  Return "empty list" error if the list is empty.
