@@ -48,7 +48,7 @@ follows:
 
 Up until now we've already seen a couple of data types:
 
-  data Bool = True | False
+  data Bool = False | True
   data Ordering = LT | EQ | GT
 
 Let's recall:
@@ -314,7 +314,7 @@ We call such types, which take parameters as input, TYPE CONSTRUCTORS.
 
 Parametrized data types are typically data containers of some sort. E.g.:
 
-> data MyBox a = InBox a
+> newtype MyBox a = InBox a
 
 So, 'MyBox' is a type constructor that we can use to define different types.
 E.g.:
@@ -333,11 +333,11 @@ What are the types of these expressions?
 
 A better way to accomplish the same:
 
-> data Box a = Box { unbox :: a } deriving Show
+> newtype Box a = Box { unbox :: a } deriving Show
 
 A parametrized type can have multiple parameters:
 
-> data MyPair a b = MyPair (a, b) deriving Show
+> newtype MyPair a b = MyPair (a, b) deriving Show
 
 So we can have:
 
@@ -381,7 +381,7 @@ We can now define:
 > showSalary :: Employee -> String
 > showSalary e = case salary e of
 >    Nothing -> "unknown"
->    Just n  -> show n ++ " kn"
+>    Just n  -> show n ++ " EUR"
 
 A function to concatenate two 'Maybe String':
 
