@@ -1,8 +1,3 @@
-import Data.List (intercalate, sort, sortOn)
-import Data.Maybe (mapMaybe)
-import Data.Ord (Down (Down))
-import Text.Printf (printf)
-
 data Point = Point Double Double
     deriving (Show)
 data Shape2 = Circle2 Point Double | Rectangle2 Point Point
