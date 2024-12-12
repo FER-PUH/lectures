@@ -3,7 +3,7 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2017/2018
+Academic Year 2024/2025
 
 LECTURE 11: Custom type classes and standard data types
 
