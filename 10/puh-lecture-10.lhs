@@ -3,493 +3,376 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2017/2018
+Academic Year 2024/2025
 
 LECTURE 10: Custom data types 2
 
-v1.1
+v1.3
 
 (c) 2017 Jan Šnajder
+    2024 Luka Hadžiegrić
 
 ==============================================================================
 
-> import Data.List
-> import Control.Monad
+> import Data.List hiding ( insert )
 
+=== RECAP ======================================================================
 
-=== RECAP ( since two weeks passed since last lecture ) ======================
+=== Sum ------------------------------------------------------------------------
 
-== Sum type
-
-> data Operation = Add Int Int | Mult Int Int | Negate Int
-
-          ^         ^             ^                ^
-          |         |-------------|----------------|
-  type constructor                |
-                                  |
-                          data constructor
-
-> makeAddition :: Int -> Int -> Operation
-> makeAddition a b = Add a b
-
-> exec :: Operation -> Int
-> exec (Add x y) = x + y
-> exec (Mult x y) = x * y
-> exec (Negate x) = (-1) * x
-
-== Product type aka record
-
-> data Animal = Animal {
->   numLegs :: Int,     -- numLegs is a "field"
->   doesItMoo :: Bool
-> }
-
-  == Fields as setters
-
-> dog = Animal { numLegs = 4, doesItMoo = False }
-> cow = dog { doesItMoo = True }
-
-  == Fields as getters
-
-  numLegs :: Animal -> Int
-  doesItMoo :: Animal -> Bool
-
-> isBiped :: Animal -> Bool
-> isBiped animal = numLegs animal == 2
-
-> isBiped' :: Animal -> Bool
-> isBiped' Animal{numLegs=legs} = legs == 2
-
-== Parametrized types
-
-> data ListWithLength a = ListWithLength Int [a]
+> data ABC = A | B | C
 >
-> addLength :: [a] -> ListWithLength a
-> addLength xs = ListWithLength (length xs) xs
+> a :: ABC
+> a = A
 >
-> getLength :: ListWithLength a -> Int
-> getLength (ListWithLength len _) = len
+> b :: ABC
+> b = B
 >
-> getList :: ListWithLength a -> [a]
-> getList (ListWithLength _ xs) = xs
+> c :: ABC
+> c = C
+>
+> showABC :: ABC -> String
+> showABC A = "A"
+> showABC B = "B"
+> showABC C = "C"
 
-== data Maybe a = Nothing | Just a
+=== Product --------------------------------------------------------------------
 
-> safeHead :: [a] -> Maybe a
+> data User = User
+>   { username :: String
+>   , password :: String
+>   }
+>
+> user1 :: User
+> user1 = User "james" "double07"
+>
+> user2 :: User
+> user2 = User
+>   { username = "admin"
+>   , password = "password123"
+>   }
+>
+> authorized :: User -> Bool
+> authorized u = password u == "double07"
+>
+> authorized' :: User -> Bool
+> authorized' User{ username = uname } = uname == "double07"
+
+=== Sum of Products ------------------------------------------------------------
+
+> data Operation = Neg Int | Add Int Int | Mul Int Int
+>
+> add :: Int -> Int -> Operation
+> add a b = Add a b
+>
+> add' :: Int -> Int -> Operation
+> add' = Add
+>
+> perform :: Operation -> Int
+> perform ( Neg n ) = negate n
+> perform ( Add a b ) = a + b
+> perform ( Mul a b ) = a * b
+
+=== Parametrized ---------------------------------------------------------------
+
+< data Maybe a = Nothing | Just a
+
+> maybeFoo :: Maybe Int
+> maybeFoo = Nothing
+>
+> maybeBar :: Maybe Double
+> maybeBar = Just 6.39
+>
+> safeHead :: [ a ] -> Maybe a
 > safeHead [] = Nothing
-> safeHead (x:_) = Just x
+> safeHead (h:_) = Just h
 
-== data Either e a = Left e | Right a
+< data Either e v = Left e | Right v
 
-> safeHead' :: [b] -> Either String b
-> safeHead' [] = Left "empty list"
-> safeHead' (x:_) = Right x
-
-
-== fmap
-
-fmap :: (a -> b) -> Maybe a -> Maybe b
-fmap f (Just x) = Just $ f x
-fmap _ Nothing  = Nothing
-
-> recap1 = fmap (+1) (Just 3)
-> recap2 = fmap (+1) Nothing
-
-
-=== INTRO ====================================================================
-
-In the previous lecture we introduced the 'data' keyword for defining custom data types:
-algebraic data types, records, and polymorphic data types. Today we extend on
-this and look into recursive data types. In particular, we look into
-polymorphic recursive types, such as lists and trees, which are important
-because they serve as data containers.
-
-=== RECURSIVE DATA STRUCTURES ================================================
-
-Data structures can be recursive. In fact, the most useful data structures are
-recursive.
-
-> data Sex = Male | Female deriving (Show,Read,Ord,Eq)
-
-> data Person = Person {
->   idNumber :: String,
->   forename :: String,
->   surname  :: String,
->   sex      :: Sex,
->   age      :: Int,
->   partner  :: Maybe Person,
->   children :: [Person] } deriving (Show, Read, Ord, Eq)
-
-Let's look at one family situation: Pero and Ana are Marko's parents, Marko and
-Maja are dating...
-
-> pero  = Person "2323" "Pero"  "Perić" Male   45 (Just ana)   [marko]
-> ana   = Person "3244" "Ana"   "Anić"  Female 43 (Just pero)  [marko,iva]
+> eitherFoo :: Either String Double
+> eitherFoo = Left "Foo Either"
 >
-> iva   = Person "4642" "Iva"   "Ivić"  Female 16 Nothing      []
+> eitherFoo' :: Either String a
+> eitherFoo' = Left "Foo Either"
 >
-> marko = Person "4341" "Marko" "Perić" Male   22 (Just maja)  []
-> maja  = Person "7420" "Maja"  "Majić" Female 20 (Just marko) []
+> errBar :: Either String Integer
+> errBar = Right 112358
 
-Now try to print out the value of 'pero'. What's happening?
+=== The fmap -------------------------------------------------------------------
 
+< fmap :: ( a -> b ) -> Maybe a -> Maybe b
+< fmap _ Nothing = Nothing
+< fmap f ( Just a ) = Just ( f a )
 
+< fmap  :: ( a -> b ) -> ( Maybe a -> Maybe b )
+< (<$>) :: ( a -> b ) -> ( Maybe a -> Maybe b )
 
+> fmap1 = fmap (+1) (Just 3)
+> fmap2 = fmap (+1) Nothing
 
+> fmap3 = (1+)  $        3
+> fmap4 = (1+) <$> (Just 3)
 
+=== INTRO ======================================================================
 
-'pero' (and other values we've defined) are infinite recursive structure. This
-is because Pero is Ana's partner, while Ana's partner is Pero, who's partner is
-Ana again, etc. If we were to represent these relationships with a graph, it
-would have cycles. If a graph has cycles, the corresponding data structure is
-infinite!
+We've gone over the 'data' keyword for introducing new algebraic data types,
+records and polymorphic data types. Today we'll look into recursive data types
+like lists and trees.
 
-What's going on here?
+=== Recursive Types ============================================================
 
-  pero == ana
-  pero == pero
+=== List -----------------------------------------------------------------------
 
+A singly linked list is the simplest form of a tree. It only has one child branch on each node.
 
+  a - a - a - a - x
 
+Here's how we can define a custom list type along with some useful automatically
+derived type classes like 'Eq', 'Ord', 'Show' and 'Read'.
 
-
-
-The first comparison works just fine, while the second one never terminates
-because 'pero' is an infinite structure. (Why does the first computation work
-then?)
-
-Let's write a function to return a name of one's partner, if such exists:
-
-> partnersForename :: Person -> Maybe String
-> partnersForename p = case partner p of
->   Just p  -> Just $ forename p
->   Nothing -> Nothing
-
-or shorter:
-
-> partnersForename2 :: Person -> Maybe String
-> partnersForename2 p = fmap forename $ partner p
-
-or even shorter than that:
-
-> partnersForename3 :: Person -> Maybe String
-> partnersForename3 = fmap forename . partner
-
-
-
-
-
-Children of both the given person and their partner (if there is one) together:
-
-> pairsChildren :: Person -> [Person]
-> pairsChildren person1 =
->   let person1Children = children person1
->       person2 = partner person1
->       person2Children = case person2 of
->         Nothing -> []
->         Just p  -> children p
->    in nub $ person1Children ++ person2Children
-
-or shorter:
-
-> pairsChildren2 :: Person -> [Person]
-> pairsChildren2 p = nub $ children p ++ maybe [] children (partner p) -- New: maybe
-
-
-Will this work?
-
-Nope. The problem is that 'nub' will compare the elements of the list. If there
-are two equal elements, this computation will never terminate.
-
-
-
-And now for something completely different. How would you go about defining the
-following function:
-
-  partnersMother :: Person -> Maybe Person
-
-Unfortunately, there's no way to do this because we have no link back to one
-person's parents. We need to either add this backlink, or put all persons in a
-list and then search the list for parents of a given person.
-
-Here's the first approach:
-
-> data Person2 = Person2 {
->   personId2 :: String,
->   forename2 :: String,
->   surname2  :: String,
->   sex2      :: Sex,   --- data Sex = Male | Female deriving (Show,Read,Eq,Ord)
->   mother2   :: Maybe Person2,
->   father2   :: Maybe Person2,
->   partner2  :: Maybe Person2,
->   children2 :: [Person2] } deriving (Show,Read,Eq,Ord)
-
-Jim and Ann are partners. They have daughters Jane and Sarah.
-Jane and John are partners. Sarah has son Mark.
-
-            john ──┐
- jim ─┐            ├●
-      ├──┬─ jane ──┘
- ann ─┘  │
-         └─ sarah ─── mark
-
-> jim = Person2 "111" "Jim" "Smith" Male Nothing Nothing (Just ann) [jane]
-> ann = Person2 "343" "Ann" "Smith" Female Nothing Nothing (Just jim) [jane, sarah]
-> jane = Person2 "623" "Jane" "Smith-Fox" Female (Just ann) (Just jim) (Just john) []
-> john = Person2 "123" "John" "Fox" Male Nothing Nothing (Just jane) []
-> sarah = Person2 "624" "Sarah" "Smith" Female (Just ann) (Just jim) Nothing [mark]
-> mark = Person2 "314" "Mark" "Smith" Male (Just sarah) Nothing Nothing []
-
-=== EXERCISE 1 ===============================================================
-
-1.1.
-- Define a function
-  areSamePerson :: Person2 -> Person2 -> Bool
-  that returns True if two given people are the same person.
-  NOTE: Be smart when doing comparison, to not get stuck in infinite execution.
-        What in Person2 defines a person uniquely?
-
-  Also, define a function
-  parents :: Person2 -> [Person2]
-  NOTE: useful function: catMaybes (you will have to import it).
-
-  We will use these two function below, for the next tasks.
-
-1.2.
-- Define a function
-  parentCheck :: Person2 -> Bool
-  that checks whether the given person is one of the children of its parents.
-  NOTE: Use `areSamePerson` and `parents` functions from above.
-
-1.3.
-- Define a function
-  sister :: Person2 -> Maybe Person2
-  that returns the sister of a person, if such exists.
-  If there are multiple, return any one of them.
-  NOTE: Useful functions: concatMap, find
-
-1.4.
-- Define a function that returns all descendants of a person.
-  descendants :: Person2 -> [Person2]
-
-==============================================================================
-
-
-
-
-
-We already know that a list is also a recursive structure. Moreover, it is a
-parametrized recursive structure.
-
-    a - a - a - a - ●
-
-Let's define our own list data type:
-
-> data MyList a = Empty | Cons a (MyList a)
->   deriving (Show, Read, Ord, Eq)
+> data List a = Null | Cons a ( List a )
+>   deriving ( Eq , Ord , Show , Read )
 
 Now we can define some lists:
 
-> l0 = Cons 1 Empty
-> l1 = 1 `Cons` Empty
-> l2 = 1 `Cons` (2 `Cons` (3 `Cons` Empty))
+> l0 = Cons 1 Null
+> l1 = 1 `Cons` Null
+> l2 = 1 `Cons` ( 2 `Cons` ( 3 `Cons` Null ) )
 
-To improve readability, we can define our own infix operator:
+Using the data constructors as infix operators can be messy, so we can deifine a
+helper operator to provide a nicer interface to our list data type.
 
-> infixr 5 -+-
-> (-+-) = Cons
+> infixr 5 ×
+> (×) = Cons
 
-Operator priority (set to 5 in the above example) range from 0 (lowest
-priority) to 9 (highest priority). E.g., ($) has a priority 0, while (.) has
-priority 9. You can find out more here:
-http://www.haskell.org/onlinereport/decls.html#fixity
+Here we've defined the fixity of ':+:' as 5, which is "medium" fixity. Levels
+range from 0 to 9 where 0 binds least tightly while 9 binds most tightly. Fixity
+levels decide which operator wins when they compete for the same value.
 
-We can now write:
+< 1 + 2 * 3 == 1 + ( 2 * 3 )
 
-> l3 = 1 -+- 2 -+- 3 -+- Empty
+The '+' sign has fixity of 6 and '*' fixity of 7. You can find out more here:
+https://www.haskell.org/onlinereport/decls.html#fixity
 
-Notice how that looks the same as
-       1  :  2  :  3  :  []
+Anyway, we can now use our new '#' operator to construct lists, just like we
+can do with the standard list type:
 
-  data [a] = [] | a : [a]
+> l3 = 1 × 2 × 3 × Null
 
-What happens if we define the actual list value recursively?
+Which is quite similar to how we'd normall define a list using the `:`
+constructor:
 
-> l4 = 1 : 2 : l4
+> l4 = 1 : 2 : 3 : []
 
+What happens if we define a list recursively?
 
-=== EXERCISE 2 ===============================================================
+> l5 = 1 : 2 : l5
 
-Reminder: data MyList a = Empty | Cons a (MyList a)
+=== EXERCISE 1 -----------------------------------------------------------------
 
-2.1.
+< data Maybe a = Nothing | Just a
+<
+< data List a = Null | Cons a ( List a )
+<   deriving ( Eq , Ord , Show , Read )
+
+1.1
 - Define
-  listHead :: MyList a -> Maybe a
 
-2.2.
-- Define a function that works like 'map' but works on a 'MyList' type:
-  listMap :: (a -> b) -> MyList a -> MyList b
-
-==============================================================================
+< listHead :: List a -> Maybe a
 
 
-A prototypical example of a recursive data structure is a tree.
+1.2
+- Define
 
-How many of you have worked with trees?
+< listFmap :: ( a -> b ) -> List a -> List b
 
-Binary tree:
+=== Tree -----------------------------------------------------------------------
 
-                      __a__
-                     /     \
-                    a       a
-                   / \     / \
-                  ●   ●   a   ●
-                         / \
-                        ●   ●
+A list is just a special case of a tree. Next, let's look at the more complex
+kind of tree. The binary tree.
 
-Here's a binary tree that stores the values in its inner nodes:
+                               ┌●
+                             ┌×┤
+                           ┌×┤ └●
+                           │ └●
+                          ×┤   ┌●
+                           │ ┌×┤ ┌●
+                           └×┤ └×┤
+                             └●  └●
 
-> data Tree a = Null | Node a (Tree a) (Tree a)
->   deriving (Show, Eq)
+Let's define a binary tree type:
 
-E.g., a binary tree of integers:
+> data Tree a = Leaf | Node a ( Tree a ) ( Tree a )
+>   deriving ( Show )
 
-> intTree :: Tree Int
-> intTree = Node 1 (Node 2 Null Null) (Node 3 Null Null)
+And here's a binary tree filled with some numbers:
 
-                      __1__
-                     /     \
-                    2       3
-                   / \     / \
-                  ●   ●   ●   ●
+> treeFoo :: Tree Int
+> treeFoo = Node 1
+>   ( Node 2
+>     Leaf
+>     ( Node 3
+>       ( Node 4 Leaf Leaf )
+>       Leaf
+>     )
+>   )
+>   ( Node 5 Leaf ( Node 6 Leaf Leaf ) )
 
-A function that sums the elements in a binary tree of integers:
+Which we can visualize like this:
 
-> sumTree :: Tree Int -> Int
-> sumTree Null                = 0
-> sumTree (Node x left right) = x + sumTree left + sumTree right
+                               ┌●
+                             ┌6┤
+                           ┌5┤ └●
+                           │ └●
+                          1┤   ┌●
+                           │ ┌3┤ ┌●
+                           └2┤ └4┤
+                             └●  └●
 
-A function that tests whether an element is contained in a tree:
+=== EXERCISE 2 -----------------------------------------------------------------
 
-> treeElem :: Eq a => a -> Tree a -> Bool
-> treeElem _ Null = False
-> treeElem x (Node y left right)
->   | x == y    = True
->   | otherwise = treeElem x left || treeElem x right
+2.1
+- Define the empty tree.
 
+< empty :: Tree a
 
-=== EXERCISE 3 ===============================================================
+> empty :: Tree a
+> empty = Leaf
 
-Reminder:
-  data Tree a = Null | Node a (Tree a) (Tree a)
-    deriving (Show, Eq)
+2.2
+- Define a function for inserting elements into the binary search tree (BST).
+  Values smaller than the root node should go to the left branch, and everything
+  else to the right branch.
 
-3.1.
-- Define a function
-  treeMax :: Ord a => Tree a -> Maybe a
-  that finds the maximum element in a tree. Return Nothing if the tree is
-  empty.
+< insert :: Ord a => a -> Tree a -> Tree a
 
-3.2.
-- Define a function
-  treeToList :: Tree a -> [a]
-  that will collect in a list all elements of a tree by doing
-  an in-order (left-root-right) traversal.
+2.3
+- Define a function which uses the inorder traversal (left, node, right) to
+  convert a tree into a list.
 
-3.3.
-- Define a function to prune the tree at a given level (root has level 0).
-  That means that all the nodes that are beyond that level should be dropped.
-  levelCut :: Int -> Tree a -> Tree a
+< toList :: Tree a -> [ a ]
 
-==============================================================================
+2.4
+- Define a function that will sort a list by converting it to tree and back to
+  list with the 'toList'.
 
+< sortList :: [ a ] -> [ a ]
 
-A sorted tree (binary search tree): for each node containing value 'x', the
-left subtree contains values that are less than 'x', while the right subtree
-contains values that are greater than 'x'. There are no duplicates.
+=== Knot -----------------------------------------------------------------------
 
-Insertion into a binary search tree:
+What if we want to "tie the knot" so to speak? Create a cyclic graph of some
+kind.
 
-> treeInsert :: Ord a => a -> Tree a -> Tree a
-> treeInsert x Null = Node x Null Null
-> treeInsert x tree@(Node y ltree rtree)
->   | x < y     = Node y (treeInsert x ltree) rtree
->   | x > y     = Node y ltree (treeInsert x rtree)
->   | otherwise = tree
+Earlier we've already seen how to do it with a list in the 'l5' example:
 
+< l5 = 1 : 2 : l5
 
-=== EXERCISE 4 ===============================================================
+If we try to print that out, we get a cycle of 1s and 2s.
 
- These are really short, so just 5 minutes.
+Let's examine a slightly more complex example. We'll define the following type:
 
-4.1.
-- Define a function that converts a list into a sorted tree. Use treeInsert from above.
-  listToTree :: Ord a => [a] -> Tree a
+> data Person = Person
+>   { pid :: Int
+>   , name :: String
+>   , friends :: [ Person ]
+>   } deriving ( Eq , Ord , Show , Read )
 
-4.2.
-- Using 'listToTree' and 'treeToList' defined previously, define:
-  sortAndNub :: Ord a => [a] -> [a]
+Now, let's define some people and their relationships with eachother:
 
+> ana    = Person 0 "Ana"    [ mateja ]
+> luka   = Person 1 "Luka"   [ marko , mateja ]
+> marko  = Person 2 "Marko"  []
+> matija = Person 3 "Matija" [ ana , luka ]
+> mateja = Person 4 "Mateja" [ ana ]
+> petar  = Person 5 "Petar"  []
 
-=== RECAP: TYPE CLASSES ======================================================
+Notice how we can reference constants before they were defined in the code. Due
+to it's lazyness, Haskell can easily resolve those references later.
 
-A type class is an INTERFACE that determines the behavior of some type.
+Here's the visualization of the relationship graph:
 
-First and foremost, let's remind ourselves: type classes are not the same as
-classes in OOP. They can be compared to interfaces though.
-And are quite similar to traits in Rust.
+                          0 <--- 3     5
+                          ↑      |
+                          ↓      ↓
+                          4 <--- 1 --> 2
 
-Some popular classes:
- - Show: show
- - Ord: <, >, max, ...
- - Num: +, *, ...
+What would happen if we try to evaluate the following expressions?:
 
-maximum :: (Ord a) => [a] -> a
+> pex0 = show ana
+> pex1 = ana == ana
+> pex2 = ana == marko
+> pex3 = marko > petar
 
 
-=== DERIVING TYPE CLASS INSTANCES ============================================
+=== Type Classes ===============================================================
 
-We've already seen that Haskell can automatically derive instances for main
-type classes: Eq, Ord, Show, Read, ...
+Type classes are not related to classes in OOP. There, classes specify the
+internal state of an object, while type classes specify interactions we can
+have with a value of a certain type.
 
-Recall an earlier example:
+A type class is an INTERFACE describing what actions we can perform  over the
+suported types. They enable us to have ad-hoc polymorphism. The difference
+between that and the type variable polymorphism we've seen so far is that we can
+have a completely different implementation for each type.
 
-  data Person = Person {
-    idNumber :: String,
-    forename :: String,
-    surname  :: String,
-    sex      :: Sex,
-    age      :: Int,
-    partner  :: Maybe Person,
-    children :: [Person] } deriving (Show,Read,Eq,Ord)
+Here's the definition of the 'Eq' type class:
 
-We can do:
+< class Eq a where
+<   (==) , (/=) :: a -> a -> Bool
+<
+<   x /= y = not (x == y)
+<   x == y = not (x /= y)
 
-> t1 = marko == ana
-> t2 = ana > marko
-> t3 = compare ana marko
-> ps = sort [marko,ana,pero]
+=== Deriving -------------------------------------------------------------------
 
-If a type is an instance of the 'Read' type class, we can read in its values
-from a string:
+Because of how the 'Eq', 'Ord' and 'Show' type classes are derived by the
+compiler we may have some issues when using their interface in certain cases, as we've seen with the 'Person' type.
 
-> s = read "Male" :: Sex
+By default Haskell has the following "stock" derivable type classes:
 
-> p3 = read $ "Person {idNumber=\"111\",forename=\"Ivo\",surname=\"Ivic\"," ++
->             "sex=Male,age=11,partner=Nothing,children=[]}" :: Person
+  | Eq, Ord, Enum, Ix, Bounded, Read, and Show
 
-The built-in 'read' assumes that the string conforms to the Haskell syntax.
-Similarly, build-in 'show' outputs the strings in Haskell syntax. A user can of
-course redefine 'read' and 'show', but doing so is recommended only in a few
-cases (as we'll see later). Note that while 'read' and 'show' can be used for
-data serialization, it is recommended to instead use different formats
-for that purpose, that are better defined and more standard, like e.g. JSON.
+Through some language extensions we can also derive the following:
 
-The 'Enum' type class allows for enumerating:
+  | Functor, Foldable, Traversable, Generic, Generic1, Lift, Data
+
+As a side not, let's recall the 'Person' definition:
+
+< data Person = Person
+<   { pid :: Int
+<   , name :: String
+<   , friends :: [ Person ]
+<   } deriving ( Eq , Ord , Show , Read )
+
+If we use the 'show' on 'marko' we get the following string (notice the escaped
+quotes):
+
+< "Person {pid = 2, name = \"Marko\", friends = []}"
+
+We can convert that 'String' back into a 'Person' by using the 'read' coming
+from the 'Read' type class. However, one important thing to note here is that
+the automatically derived 'Read' type class relies on the 'Show' instance to
+output correctly formatted code.
+
+We can implement any of those type class instances by hand, so it's important to
+remember that some of them rely on certain features of another type class.
+
+One useful stock derivable type class is 'Enum'. It allows us to use that nice
+'[0..1]' syntax.
+
+Let's define the 'Weekday' type:
 
 > data Weekday =
 >   Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
 >   deriving (Show,Enum)
+
+Now we can define a list containing all twelve months:
+
+> weekdays :: [ Weekday ]
+> weekdays = [ Monday .. Friday ]
+
+We also get the 'succ' and 'pred' functions that will give us a successor or
+predecessor of a value:
 
 > yesterday :: Weekday -> Weekday
 > yesterday = pred
@@ -497,22 +380,19 @@ The 'Enum' type class allows for enumerating:
 > dayAfterYesterday :: Weekday -> Weekday
 > dayAfterYesterday = succ . pred
 
-> workDays = [Monday .. Friday]
-
-
-=== DEFINING TYPE CLASS INSTANCES ============================================
+=== Instances ------------------------------------------------------------------
 
 What if we don't want to derive a type class instances, but want to define our
 own, custom type class instance?
 
-Now let's look at an example. We'd like to define a different kind of equality
-test for our Person data type. E.g., we'd like to consider two persons to be identical
-if they have the same national identification number. In this case we would not
-need to check the other fields (which is good because the structure is
-infinite). Similarly, we could define an ordering based on this number.
+Let's look at an example. We'd like to define a different kind of equality test
+for our 'Person' data type. E.g., we'd like to consider two persons to be
+identical if they have the same 'pid'. We can also define 'Ord'ering based on
+the 'pid' value.
 
-Before we look at how to define an instance for `Eq` type class,
-let's first look at how actual `Eq` type class is defined:
+Before we look at how to define an instance of `Eq` type class,
+let's first look at how actual `Eq` type class is defined. You can get this
+information by typing ':i ClassName' in the repl.
 
         |- type class name
         |
@@ -532,7 +412,7 @@ definitions themselves are not given here, only the type signatures.
 This can be read as: for some type `a` to implement typeclass `Eq`, it needs to
 implement following methods: (==), (/=).
 
-We then can (but most not) have default definitions of functions, like it is
+We then can have default definitions of functions, like it is
 done in this case.
 
 Having default definitions means that, when defining and instance, one will not
@@ -562,44 +442,33 @@ instance Eq Weekday where
   Sunday    == Sunday    = True
   _         == _         = False
 
-Of course, this can become tedious, so that's why we can automatically derive
-an instance.
-
 We can now define our own 'Eq' instance for the 'Person' type:
 
-- > instance Eq Person where
-- >   p1 == p2 = idNumber p1 == idNumber p2
+< instance Eq Person where
+<   p1 == p2 = pid p1 == pid p2
 
-REMARK FOR THE LECTURER:
-- Uncomment instance Eq Person above
-- remove 'deriving Eq' from the definition of the 'Person' type.
+Now 'ana == ana' will work.
 
-Now 'pero == pero' will work (check it out!).
+Let's also define an instance for 'Ord' type class. The minimal complete
+definition is (<=). So it suffices to define:
 
-Let's also define an instance for 'Ord' type class. The minimal complete definition
-is (<=). So it suffices to define:
+< instance Ord Person where
+<   p1 <= p2 = idNumber p1 <= idNumber p2
 
- instance Ord Person where
-   p1 <= p2 = idNumber p1 <= idNumber p2
-
-REMARK: We can use the ":info" command in ghci to see a definition of a type
-class and all its instances.
-
-=== EXERCISE 5 ===============================================================
+=== EXERCISE 3 -----------------------------------------------------------------
 
 5.1.
-- Define an 'Eq' instance for the 'Weekday' type that describes a repetitive work week,
-  in a sense that all the days are identical to every each other, except for Saturday and Sunday,
-  those are unique and even two Saturdays or Sundays are not identical.
-  So e.g. Monday == Tuesday should be True but Saturday == Saturday should be False.
+- Define an 'Eq' instance for the 'Weekday' type that describes a repetitive
+  work week, in a sense that all the days are identical to every each other,
+  except for Saturday and Sunday, those are unique and even two Saturdays or
+  Sundays are not identical. So e.g. Monday == Tuesday should be True but Saturday == Saturday should be False.
 
 5.2.
 - Define 'Person' as an instance of 'Show' type class so that instead of the
-  values of partners and children only the respective person names are shown,
-  which will enable the print out of an infinite structure of this type.
+  full values of 'friends' you only print out their names. Remove the derived
+  'Show' instance from the 'Person' definition.
 
-==============================================================================
-
+=== Parametrized types ---------------------------------------------------------
 
 What if we want to define an instance of a parametrized type?
 
@@ -636,27 +505,24 @@ Kind '*' is just an ordinary type.
 Kind '* -> *' is a unary type constructor, that takes in an ordinary type and
 returns an ordinary type.
 
-> data MyList' a = Empty' | Cons' a (MyList' a)
-
-> data Tree' a = Null' | Node' a (Tree' a) (Tree' a)
-
-> tree'ToList :: Ord a => Tree' a -> [a]
-> tree'ToList Null' = []
-> tree'ToList (Node' x ltree rtree) = tree'ToList ltree ++ [x] ++ tree'ToList rtree
-
-== EXERCISE 6 ================================================================
+=== EXERCISE 4 -----------------------------------------------------------------
 
 6.1.
-- Define an instance of `Eq` for `MyList' a` so that two lists are considered
+- Define an instance of `Eq` for `List a` so that two lists are considered
   equal only if they have the same first element, or if they are both empty.
 
+  < data List a = Null | Cons a ( List a )
+  <   deriving ( Eq , Ord , Show , Read )
+
 6.2.
-- Define an instance of `Eq` for `Tree' a` so that two trees are considered
+- Define an instance of `Eq` for `Tree a` so that two trees are considered
   equal if they store the same values, regardless of the position of these
   values in the trees, and regardless of duplicates.
+
+  < data Tree a = Leaf | Node a ( Tree a ) ( Tree a )
+  <   deriving ( Show )
 
 === NEXT =====================================================================
 
 In the next lecture we'll look into custom types classes as well as standard
 data types, such as sets, maps, trees, and graphs.
-
