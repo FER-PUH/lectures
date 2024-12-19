@@ -158,17 +158,6 @@ it. The result of the 'getLine' action is a string but we chose not to store it
 
 == EXERCISE 1 =================================================================
 
-1.1.
-- Define a 'main' function that reads in two strings and prints them out
-  concatenated and reversed.
-
-1.2.
-
-- Write a function 'threeNumbers' that reads in three numbers and prints out
-  their sum.
-- Call this function from within a 'main' function, then compile and run the
-  program.
-
 == RETURN =====================================================================
 
 What if we wish to modify a string taken from the input, before we return if
@@ -264,35 +253,6 @@ again need to sequence them into a single action using a 'do' block:
 >   else return number 
 
 == EXERCISE 2 =================================================================
-
-2.1.
-- Define a function 'threeStrings' that reads in three strings and outputs them
-  to the screen as one string, while it returns its total length.
-  treeStrings :: IO Int
-
-2.2.
-- Define a function 'askNumber9' that reads in a number and returns that number
-  converted into an 'Int'. Input should be repeated until the user enters a
-  number (a string containing only digits).
-    askNumber9 :: IO Int
-- Define a function 'main' that calls 'askNumber9' and outputs the number to
-  the screen.
-- Build and run the program.
-
-2.3.
-- Define a function 'askUser m p' that returns an action that prints out 'm',
-  reads in a string from the input, repeats the input until the input
-  string satisfies the function 'p', and then returns the input string.
-    askUser :: String -> (String -> Bool) -> IO String
-- Generalize this function to
-    askUser' :: Read a => String -> (String -> Bool) -> IO a
-- Define a 'main' function that prints out the read-in value to the screen.
-- Build and run the program.
-
-2.4.
-- Define a function that reads in strings until the user inputs an empty
-  string, and then returns a list of strings received as input.
-    inputStrings :: IO [String]
 
 == WHERE & LET ===============================================================
 
@@ -497,20 +457,6 @@ Take a quiet moment to think about the type of this function.
 
 == EXERCISE 3 =================================================================
 
-3.1.
-- Define a function that reads in a number, then reads in that many
-  strings, and finally prints these strings in reverse order.
-
-3.2.
-- Give recursive definitions for 'sequence' and 'sequence_'.
-
-3.3.
-- Give a recursive definitions for 'mapM' and 'mapM_'.
-
-3.4.
-- Define a function that prints out the Pythagorean triplets whose all sides
-  are <=100. Every triplet should be in a separate line.
-
 == READING FROM STREAMS ======================================================
 
 Up until now we read from the standard input line by line ('getLine' function).
@@ -593,21 +539,6 @@ For example, we could have defined the above functions like this:
 > main29 = interact (unlines . filter (not . null) . lines)
 
 == EXERCISE 4 ================================================================
-
-4.1.
-- Define a function that removes from standard input every second line and
-  prints the result to standard output.
-    filterOdd :: IO ()
-
-4.2.
-- Define a function that prefixes each line from standard input with a line
-  number (number + space).
-    numberLines :: IO ()
-
-4.3.
-- Define a function to remove from standard input all words from a given set of
-  words.
-    filterWords :: Set String -> IO ()
 
 == WORKING WITH FILES ========================================================
 
@@ -710,19 +641,6 @@ A couple of other useful functions from 'System.IO':
   hIsEOF :: Handle -> IO Bool
 
 == EXERCISE 5 ================================================================
-
-5.1.
-- Define a function
-  wc :: FilePath -> IO (Int, Int, Int)
-  that counts the number of characters, words, and lines in a file.
-- NB: This function will probably misbehave. If this happens, learn more about
-  why it happened here: https://tinyurl.com/y9xobdyd .
-  Even 'seq' won't do the trick; you'll need 'deepseq' from Control.DeepSeq.
-
-5.2. 
-- Define a function
-  copyLines :: [Int] -> FilePath -> FilePath -> IO ()
-  that copies given lines from the first file into the second.
 
 ==============================================================================
 
@@ -853,25 +771,6 @@ output and do with it what she wants.
 
 == EXERCISE 6 =================================================================
 
-6.1.
-- Define a function
-    wordTypes :: FilePath -> IO Int
-  to compute the number of distinct words in the given file.
-
-6.2.
-- Define a function 
-    diff :: FilePath -> FilePath -> IO ()
-  that takes two file names, compares their corresponding lines, and then
-  outputs to standard output all lines in which the files differ. Lines should 
-  be printed one below the other, prefixed with "<" for the first and ">" for
-  the second file.
-
-6.3.
-- Define a function
-    removeSpaces :: FilePath -> IO () 
-  that removes trailing spaces from all lines in the given file.
-  The function should change the original file.
-
 == EXCEPTION HANDLING =========================================================
 
 IO actions can cause exceptions. Exceptions can be handled but only within an
@@ -977,24 +876,6 @@ https://hackage.haskell.org/package/optparse-applicative
 
 == EXERCISE 7 =================================================================
 
-7.1.
-- Define a function
-    fileHead :: IO ()
-  that prints the first 'n' lines from a file. The name of the file and the
-  number of lines are specified at the command line, e.g.:
-    filehead -5 input.txt
-  If the number of lines is missing, default to 10. If file name is missing,
-  read from the standard input. If the file doesn't exist, print an error
-  message and exit with failure using 'exitFailure' from 'System.Exit'.
-
-7.2.
-- Define a function
-    sortFiles :: IO ()
-  that sorts lines from multiple files and prints them to standard output.
-  File names are provided at the command line.
-  "sortFiles file1.txt file2.txt file3.txt"
-  If any of the files does not exist, print an error message.
-
 == FILE SYSTEM OPERATIONS =====================================================
 
 Module 'System.Directory' contains a set of functions for interacting with a
@@ -1095,15 +976,3 @@ flexible framework for random number generation:
 http://hackage.haskell.org/package/MonadRandom
 
 == EXERCISE 8 =================================================================
-
-8.1.
-- Define your own implementation of
-    randoms' :: (RandomGen g, Random a) => g -> [a]
-
-8.2.
-- Define a function
-    randomPositions :: Int -> Int -> Int -> Int -> IO [(Int,Int)]
-  that returns a list of randomly generated integer coordinates from within a
-  given interval.
-    randomPositions 0 10 0 10 => [(2,1),(4,3),(7,7),...
-
