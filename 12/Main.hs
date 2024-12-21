@@ -1,7 +1,8 @@
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 module Main where
 
-import LectureExercises (filterOdd) 
+import LectureExercises (sortFiles, fileHead) 
 
 main :: IO ()
-main = filterOdd 
+main = sortFiles 
 

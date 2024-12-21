@@ -14,6 +14,7 @@ import Data.Set (Set)
 import Data.Set qualified as Set
 import System.Directory
 import System.Environment
+import System.Exit (die)
 import System.FilePath
 import System.IO
 import System.IO.Error
@@ -256,23 +257,36 @@ diff :: FilePath -> FilePath -> IO ()
 diff file1 file2 = do
   content1 <- lines <$> readFile file1
   content2 <- lines <$> readFile file2
-  let maxLines = max (length content1) (length content2)
-  -- TODO implement this with zip filter and mapM
-  let compareLines i -- we use let here so we have content1 and content2 in scope
-        | i >= length content1 && i < length content2 = putStrLn ("> " ++ content2 !! i)
-        | i >= length content2 && i < length content1 = putStrLn ("< " ++ content1 !! i)
-        | content1 !! i /= content2 !! i = do
-            putStrLn ("< " ++ content1 !! i)
-            putStrLn ("> " ++ content2 !! i)
-        | otherwise = return ()
-  mapM_ compareLines [0 .. maxLines - 1]
+  -- could have used filter here
+  let tuples = [t | t@(_, line1, line2) <- zip3 [1 ..] content1 content2, line1 /= line2]
+  forM_ tuples $ \(n, l1, l2) -> do
+    putStrLn $ "line " ++ show n ++ ":"
+    putStrLn $ "    < " ++ l1
+    putStrLn $ "    > " ++ l2
 
 -- ** 6.3.
 
 -- Define a function that removes trailing spaces from all lines in the given
 -- file. The function should modify the original file.
 removeSpaces :: FilePath -> IO ()
-removeSpaces = undefined
+removeSpaces file = do
+  content <- lines <$> readFile file
+  -- content `deepseq` return ()
+  let result = unlines $ map (reverse . trimSpaces . reverse) content
+  writeFile file result
+  where
+    trimSpaces :: String -> String
+    trimSpaces [] = []
+    trimSpaces str@(c : rest)
+      | c == ' ' = trimSpaces rest
+      | otherwise = str
+
+-- A better approach using `dropWhileEnd`
+removeSpaces' :: FilePath -> IO ()
+removeSpaces' file = do
+  content <- readFile file
+  let result = unlines $ map (dropWhileEnd isSpace) (lines content)
+  writeFile file result
 
 -- * EXERCISE 7 ===============================================================
 
@@ -282,16 +296,64 @@ removeSpaces = undefined
 -- and number of lines are provided via the command line. Default to 10 lines
 -- if the number is missing. Read from standard input if the file name is
 -- missing. Exit with failure if the file does not exist.
+
+-- Test this by putting `main = fileHead` in Main.hs and running the command
+-- cabal run main -- --file testFile1.txt --lines 3
 fileHead :: IO ()
-fileHead = undefined
+fileHead = do
+  args <- getArgs
+  case parseArgs args of
+    Left err -> die err
+    Right (maybePath, numLines) -> do
+      content <- readContent maybePath
+      putStr . unlines . take numLines . lines $ content
+  where
+    parseArgs :: [String] -> Either String (Maybe String, Int)
+    parseArgs [] = Right (Nothing, 10)
+    parseArgs ["--file", filePath] = Right (Just filePath, 10)
+    parseArgs ["--lines", numStr] = validateArgs Nothing numStr
+    parseArgs ["--file", filePath, "--lines", numStr] = validateArgs (Just filePath) numStr
+    parseArgs ["--lines", numStr, "--file", filePath] = validateArgs (Just filePath) numStr
+    parseArgs _ = Left usageString
+
+    validateArgs :: Maybe String -> String -> Either String (Maybe String, Int)
+    validateArgs filePath numStr = case reads numStr of
+      [(n, "")] | n > 0 -> Right (filePath, n)
+      _ -> Left "Error: Number of lines must be a positive integer."
+
+    readContent :: Maybe String -> IO String
+    readContent Nothing = getContents
+    readContent (Just file) = catch (readFile file) handleReadFileError
+
+    handleReadFileError :: IOException -> IO String
+    handleReadFileError _ = die "Error: File not found or inaccessible."
+
+    usageString :: String
+    usageString = "Usage: fileHead [--file <filePath>] [--lines <numberOfLines>]"
 
 -- ** 7.2.
 
 -- Define a function that sorts lines from multiple files and prints them to
 -- standard output. File names are provided via the command line. Print an
 -- error message if any file does not exist.
+
+-- Test this by putting `main = sortFiles` in Main.hs and running the command
+-- cabal run main -- testFile1.txt testFile2.txt testFile3.txt
 sortFiles :: IO ()
-sortFiles = undefined
+sortFiles = do
+  args <- getArgs
+  if null args
+    then die "Error: No files provided."
+    else do
+      contents <- mapM readFileSafe args
+      putStr . unlines . sort . concatMap lines $ contents
+  where
+    readFileSafe :: FilePath -> IO String
+    readFileSafe file = catch (readFile file) handleReadFileError
+
+    handleReadFileError :: IOException -> IO String
+    -- here we can choose to exit the program completely or continue, we chose death
+    handleReadFileError _ = die "Error: One or more files could not be read."
 
 -- * EXERCISE 8 ===============================================================
 
@@ -299,7 +361,9 @@ sortFiles = undefined
 
 -- Define your own implementation of the 'randoms' function.
 randoms' :: (RandomGen g, Random a) => g -> [a]
-randoms' = undefined
+randoms' generator =
+  let (r, generator') = random generator
+   in r : randoms generator'
 
 -- ** 8.2.
 
@@ -307,4 +371,13 @@ randoms' = undefined
 -- a specified interval.
 -- Example: randomPositions 0 10 0 10 => [(2,1), (4,3), (7,7), ...]
 randomPositions :: Int -> Int -> Int -> Int -> IO [(Int, Int)]
-randomPositions = undefined
+randomPositions x1 x2 y1 y2 = do
+  sequence $ repeat $ do
+    x <- getStdRandom (randomR (x1, x2))
+    y <- getStdRandom (randomR (y1, y2))
+    return (x, y)
+
+-- take 10 <$> randomPositions 0 10 15 20
+
+-- ^ ^ this never terminates in ghci for me so for testing you can make the signature
+-- return IO () and in place of `return` put `print`
