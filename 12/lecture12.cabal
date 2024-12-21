@@ -19,6 +19,7 @@ library
                     , directory 
                     , filepath 
                     , random 
+                    , deepseq
     default-language: Haskell2010
 
 executable main 
@@ -30,4 +31,5 @@ executable main
                     , directory 
                     , filepath 
                     , random 
+                    , deepseq
     default-language: GHC2021
