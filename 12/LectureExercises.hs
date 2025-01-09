@@ -137,8 +137,4 @@ randoms' = undefined
 -- a specified interval.
 -- Example: randomPositions 0 10 0 10 => [(2,1), (4,3), (7,7), ...]
 randomPositions :: Int -> Int -> Int -> Int -> IO [(Int, Int)]
-randomPositions x1 x2 y1 y2 = do
-  sequence $ repeat $ do
-    x <- getStdRandom (randomR (x1, x2))
-    y <- getStdRandom (randomR (y1, y2))
-    return (x, y)
+randomPositions = undefined
