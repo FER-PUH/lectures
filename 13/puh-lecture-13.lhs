@@ -3,7 +3,7 @@ Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2023/2024
+Academic Year 2024/2025
 
 LECTURE 13: Monads 1
 
@@ -44,7 +44,7 @@ Go through the motivational examples (transactions, logged, knights).
   7. Take a look at "monad.hs" too see how we'd implement all above problems
   using real Monads.
 
-The rest of the lectures should still work on its own. It doesn't rely on the
+The rest of the lecture should still work on its own. It doesn't rely on the
 motivational examples, but we recommend you take a look at them anyway.
 
 == THE MAYBE MONAD ===========================================================
