@@ -31,10 +31,11 @@ MODELS:
 The most prominent example of a monad is the IO monad, which we use for IO
 operations.
 
-Go through the motivational examples (transactions, logged, knights).
-  1. Solve all tasks in the "transactions" folder
-  2. Solve all tasks in the "knight" folder
-  3. Solve all tasks in the "logged" folder
+Go through the motivational examples (logged, transactions, knights):
+
+  1. We'll solve the tasks in the "logged" folder together
+  2. Solve all tasks in the "transactions" folder
+  3. Solve all tasks in the "knight" folder
   4. Look at the "Generalizing into Workflow" part of the pdf presentation to see
   how we can generalize what we just implemented
   5. Generalize all these operations under a type class by solving tasks in

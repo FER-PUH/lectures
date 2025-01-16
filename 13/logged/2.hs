@@ -74,6 +74,8 @@ doubleSquareAndHalveL' = undefined
 --
 -- Task 5: Implement the operator `|>`.
 -- It should act exactly the same as chain, but with the arguments flipped.
+infixl 1 |>
+
 (|>) :: Logged Double -> (Double -> Logged Double) -> Logged Double
 loggedDouble |> fD = undefined
 
