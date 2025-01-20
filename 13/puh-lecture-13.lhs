@@ -507,8 +507,4 @@ What is the following function doing?
 >   c <- "abc"
 >   return (n, c)
 
-== NEXT ======================================================================
-
-Next week we'll look into a few more monads. We'll also look into generic
-functions for working with monads.
 

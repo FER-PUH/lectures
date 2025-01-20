@@ -33,7 +33,7 @@ state.
 
 Example 1: Labeling the nodes of a tree
 
-> data Tree a = Leaf a | Branch (Tree a) (Tree a) deriving (Show,Eq)
+> data Tree a = Leaf a | Branch (Tree a) (Tree a) deriving (Show, Eq)
 
 > t1 = Branch (Branch (Leaf 'b') (Leaf 'c')) (Branch (Leaf 'd') (Leaf 'a'))
 
@@ -48,9 +48,9 @@ Example 1: Labeling the nodes of a tree
 Example 2: A random number generator
 
 > g = mkStdGen 13
-> (r1,g2) = random g :: (Int, StdGen)
-> (r2,g3) = random g2 :: (Int, StdGen)
-> (r3,g4) = random g3 :: (Int, StdGen)
+> (r1, g2) = random g :: (Int, StdGen)
+> (r2, g3) = random g2 :: (Int, StdGen)
+> (r3, g4) = random g3 :: (Int, StdGen)
 
 In both cases we have to drag around a state: each function takes the current
 state as an argument and yields a return a value plus the updated state. This
@@ -69,9 +69,9 @@ First, let's make 'SM' an instance of the 'Monad' type class:
 >   fmap f (SM a) = SM $ \s -> let (s', a') = a s in (s', f a')
 >
 > instance Applicative (SM s) where
->   pure a = SM (\s -> (s,a))
+>   pure a = SM (\s -> (s, a))
 >   SM f <*> (SM a) = SM $ \s ->
->     let (s',f') = f s
+>     let (s', f') = f s
 >         (s'', a') = a s'
 >     in (s'', f' a')
 >
@@ -80,16 +80,16 @@ First, let's make 'SM' an instance of the 'Monad' type class:
 >   return a = SM (\s -> (s, a))
 >
 >   SM sm0 >>= fsm1 = SM $ \s0 ->
->     let (s1,a1) = sm0 s0  -- left computation on the state
+>     let (s1, a1) = sm0 s0  -- left computation on the state
 >         SM sm1 = fsm1 a1  -- the computation of the "right monad"
->         (s2,a2) = sm1 s1  -- right computation on the state
->     in (s2,a2)
+>         (s2, a2) = sm1 s1  -- right computation on the state
+>     in (s2, a2)
 
 'return a' gives us a function that takes a state and returns the unaltered
 state together with a return value 'a'. The definition of binding operator
 (>>=) is a bit more intricate. Let's remind ourselves of its type:
 
-  (>>=) :: m a -> (a -> m b) -> mb
+  (>>=) :: m a -> (a -> m b) -> m b
 
 The bind operator needs to unwrap the left 'm a' value, which is actually a
 function. This function is applied to the initial state, which gives a new
@@ -123,7 +123,7 @@ Let's try it out:
 > v2 = runSM' (dec >> inc >> dec) 0
 
 The above examples suggest that we can think of a monad as a sequence of
-computations that wait to be executed.  Using the (>>=) operator, we bind
+computations that wait to be executed. Using the (>>=) operator, we bind
 together the individual computations into one big chain. This chain is actually
 one large function that needs to be applied to an initial state. When we want
 to execute this chain of computation, we use the 'runSM' function, which
@@ -226,69 +226,6 @@ Solve the following problems in the state monad 'SM s a'.
     threeRandoms :: SM g (Int,Int,Int)
   that returns three random numbers.
 
-== LIST MONAD ================================================================
-
-A list (more precisely: the '[]' type constructor) is also a monad instance. It
-is defined as follows:
-
-  instance Monad [] where
-    return x = [x]
-    xs >>= f = concat (map f xs)
-    fail _ = []
-
-m1 >> m2 = m1 >>= \_ -> m2
-
-The (>>=) operator simply maps the function 'f' over the given list as its
-left argument. Because 'f' itself returns a list, we end up with a list of
-lists, which we than flatten out into a single list using 'concat'. For
-example:
-
-> l1 = [1, 2, 3] >>= \x -> [x, x^2]
-
-This is equivalent to:
-
-> l2 = do
->   x <- [1,2,3]
->   [x, x^2]
-
-which probably is more readable.
-
-What about the following computation?
-
-> l3 = [1,2,3] >> [4,5,6]
-
-This is equivalent to:
-
-> l3' = [1,2,3] >>= \_ -> [4,5,6]
-
-Another example:
-
-> tuples = do
->   n <- [1..10]
->   c <- "abc"
->   return (n, c)
-
-We end up with a list of pairs (Cartesian product [1..10]*"abc"). We could have
-accomplished the same using a list comprehension:
-
-> tuples' = [(n,c) | n <- [1..10], c <- "abc"]
-
-We now see that a list comprehension is just syntactic sugar for a list monad.
-
-What is the following function doing?
-
-> fooo [] = [[]]
-> fooo xs = do
->   x <- xs
->   ys <- fooo (delete x xs)
->   return (x:ys)
-
-> tuples2 = do
->   n <- [1..10]
->   guard $ n >= 5
->   c <- "abc"
->   return (n, c)
-
 == FUNCTIONS FOR WORKING WITH MONADS =========================================
 
 We've already encountered a couple of useful functions for working with monads
@@ -380,7 +317,7 @@ For example
 The definition of the 'join' function is quite simple:
 
   join :: (Monad m) => m (m a) -> m a
-  join m =  m >>= id
+  join m = m >>= id
 
 This function might seem dull at first, but it's actually quite interesting
 from a theoretical point of view because it gives us an alternative definition
@@ -493,6 +430,3 @@ Another example: evaluation of an arithmetic expression.
 > eval (Div e1 e2) = case eval e2 of
 >   Just 0 -> Nothing
 >   e      -> liftM2 (/) (eval e1) e
-
-WE CONTINUE AT 20:10
-
