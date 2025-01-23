@@ -9,7 +9,14 @@ LECTURE 14: Monads 2
 
 v1.0
 
-(c) 2017 Jan Šnajder
+(c) 2024 Jan Šnajder, Mihovil Ilakovac
+
+==============================================================================
+
+We'll go over the State Monad today analogously to the previous lecture Monads
+in the state.hs file.
+
+The rest of the lecture works on its own and we recommend you read through it.
 
 ==============================================================================
 
