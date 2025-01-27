@@ -54,7 +54,7 @@ Setting phasers to stun... (port 3000) (ctrl-c to quit)
 ### The `scp` command
 You can copy your binary to a server using `scp`:
 ```bash
-scp ./bin/bank username@server_ip_or_domain:/path/on/server
+scp bank username@server_ip_or_domain:/path/on/server
 ```
 
 ### The `watch` command
