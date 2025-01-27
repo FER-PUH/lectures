@@ -47,6 +47,6 @@ This function demonstrates a long monadic pipeline (i.e., a sequence of all Wasp
 Demonstrates:
   - Pattern matching
   - Custom recursion for constructing a nested compiler error message
-## Getting `maybeEnvValidationSchema`
+## Getting [`maybeEnvValidationSchema`](https://github.com/wasp-lang/wasp/blob/1b24645cf94ace459416b87c34127f32660a674e/waspc/src/Wasp/Generator/SdkGenerator/EnvValidation.hs#L56)
 A nice demonstration of using `Maybe` as a monad with the bind operator (`>>=`)
 
