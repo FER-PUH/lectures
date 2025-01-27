@@ -1,6 +1,6 @@
 # Haskell in practice
 ## A simple banking app
-You can find all resources and instructions are [here](./bank/README.md).
+You can find all resources and instructions are [here](./bank).
 
 ## Haskell examples from [Wasp](https://wasp-lang.dev/)
 ### The [`findWaspFile`](https://github.com/wasp-lang/wasp/blob/1b24645cf94ace459416b87c34127f32660a674e/waspc/src/Wasp/Project/WaspFile.hs#L30) function
