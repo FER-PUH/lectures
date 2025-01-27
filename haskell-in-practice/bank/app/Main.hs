@@ -9,13 +9,14 @@ main = do
   args <- getArgs
   case args of
     ["serve"] -> serve
-    _ -> executeDirectCommand args
+    directCommand -> executeDirectCommand directCommand
 
 executeDirectCommand :: [String] -> IO ()
 executeDirectCommand args = case parseCommand args of
   Left errorMessage -> putStrLn errorMessage
   Right command -> processCommand command >>= putStrLn
 
+-- We could make the parsing more robust, but this is enough for now :)
 parseCommand :: [String] -> Either String Command
 parseCommand args = case args of
   ["deposit", name, amount] -> Right $ Deposit name (read amount)
