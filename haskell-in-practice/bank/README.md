@@ -1,3 +1,10 @@
+## Creating the project
+We initialized the project by creating a new directory and running `cabal init --simple`
+```bash
+mkdir bank
+cd bank
+cabal init --simple # Choose executable (default)
+```
 ## REPL
 Use `cabal repl` to easily play around and test your functions. Functions from
 `Main` (the main module) can be exucted right away, while functions from other
