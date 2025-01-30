@@ -58,10 +58,12 @@ newtype SM s a = SM
   { runSM' :: s -> (s, a)
   }
 
+{- Exercise 01 : Define the Functor instance for 'SM' -}
 instance Functor (SM s) where
   fmap :: (a -> b) -> SM s a -> SM s b
   fmap f (SM ssa) = SM $ \s -> let (s', a) = ssa s in (s', f a)
 
+{- Exercise 02 : Define the Applicative instance for 'SM' -}
 instance Applicative (SM s) where
   pure :: a -> SM s a
   pure a = SM $ \s -> (s, a)
@@ -72,6 +74,7 @@ instance Applicative (SM s) where
         (s2, a) = ssa s1
      in (s2, f a)
 
+{- Exercise 03 : Define the Monad instance for 'SM' -}
 instance Monad (SM s) where
   (>>=) :: SM s a -> (a -> SM s b) -> SM s b
   SM sa >>= asmsb = SM $ \s0 ->
@@ -153,7 +156,7 @@ foo3 = do
 label2 :: Tree a -> SM Int (Tree Int)
 label2 (Leaf _) = do
   n <- get
-  inc
+  set (n + 1)
   pure (Leaf n)
 label2 (Branch t1 t2) = do
   t1' <- label2 t1
@@ -178,31 +181,36 @@ labelTree t = runSM (label2 t) 0
 -}
 
 nop :: SM s ()
-nop = undefined
+nop = SM $ \s -> (s, ())
 
 nop' :: SM s ()
-nop' = undefined
+nop' = get >>= set
 
 nop'' :: SM s ()
-nop'' = undefined
+nop'' = do
+  s <- get
+  set s
 
 reset :: SM Int ()
-reset = undefined
+reset = SM $ \_ -> (0, ())
 
 reset' :: SM Int ()
-reset' = undefined
+reset' = set 0
 
 reset'' :: SM Int ()
-reset'' = undefined
+reset'' = do
+  set 0
 
 update :: (s -> s) -> SM s ()
-update = undefined
+update updateFn = SM $ \s -> (updateFn s, ())
 
 update' :: (s -> s) -> SM s ()
-update' = undefined
+update' updateFn = get >>= set . updateFn
 
 update'' :: (s -> s) -> SM s ()
-update'' = undefined
+update'' updateFn = do
+  s <- get
+  set $ updateFn s
 
 {- Exercise 05
 
@@ -221,13 +229,25 @@ update'' = undefined
 -}
 
 random' :: (RandomGen g, Random a) => SM g a
-random' = undefined
+random' = do
+  gen <- get
+  let (ra, gen2) = random gen
+  set gen2
+  return ra
 
 initRandom :: Int -> SM StdGen ()
-initRandom = undefined
+initRandom seed = set $ mkStdGen seed
 
 threeRandoms :: SM StdGen (Int, Int, Int)
-threeRandoms = undefined
+threeRandoms = do
+  a <- random'
+  b <- random'
+  c <- random'
+  return (a, b, c)
+
+-- Marin's solution, uses the fact that `random'` is polymorphic
+threeRandomsMarin :: SM StdGen (Int, Int, Int)
+threeRandomsMarin = random'
 
 -- * Review of useful Monad functions
 
