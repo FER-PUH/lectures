@@ -29,6 +29,7 @@ Haskell, how they named it, etc.): https://www.youtube.com/watch?v=LnX3B9oaKzw
 - PUH is based on this book, you can read it online for free (a little outdated but still great):
 https://www.learnyouahaskell.com/
 - A more comprehensive book: https://haskellbook.com/
+- Haskell Wikibook: https://en.wikibooks.org/wiki/Haskell
 - A weekly aggregator of all Haskell news/posts: https://haskellweekly.news/
 - The official Haskell forum: https://discourse.haskell.org/
 - Haskell's subreddit: https://www.reddit.com/r/haskell/
