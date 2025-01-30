@@ -29,6 +29,8 @@ Haskell, how they named it, etc.): https://www.youtube.com/watch?v=LnX3B9oaKzw
 - PUH is based on this book, you can read it online for free (a little outdated but still great):
 https://www.learnyouahaskell.com/
 - A more comprehensive book: https://haskellbook.com/
+- https://haskellweekly.news/ (An aggregator of all Haskell news/posts)
+- https://discourse.haskell.org/ (The official Haskell forum)
 - An excellent Haskell blog by Alexis King (most advice applies to other
 languages too): https://lexi-lambda.github.io/. Some of my favorite articles include:
   - https://lexi-lambda.github.io/blog/2020/11/01/names-are-not-type-safety/
@@ -36,6 +38,8 @@ languages too): https://lexi-lambda.github.io/. Some of my favorite articles inc
   - https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/ (everybody should read this one)
 - Great reminder on why monads are great:
 https://philipnilsson.github.io/Badness10k/posts/2017-05-07-escaping-hell-with-monads.html
+- And of course, when you get stuck, don't forget about the PUH Discord. We're
+always happy to talk Haskell :)
 
 ## Using your computer efficiently
 - MIT course: https://missing.csail.mit.edu/2020/
