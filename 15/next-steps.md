@@ -29,8 +29,12 @@ Haskell, how they named it, etc.): https://www.youtube.com/watch?v=LnX3B9oaKzw
 - PUH is based on this book, you can read it online for free (a little outdated but still great):
 https://www.learnyouahaskell.com/
 - A more comprehensive book: https://haskellbook.com/
-- https://haskellweekly.news/ (An aggregator of all Haskell news/posts)
-- https://discourse.haskell.org/ (The official Haskell forum)
+- A weekly aggregator of all Haskell news/posts: https://haskellweekly.news/
+- The official Haskell forum: https://discourse.haskell.org/
+- Haskell's subreddit: https://www.reddit.com/r/haskell/
+- Learn Haskell by implementing a blog generator (if you finished PUH, you
+probably know most of this stuff, but it might still be fun):
+https://learn-haskell.blog/
 - An excellent Haskell blog by Alexis King (most advice applies to other
 languages too): https://lexi-lambda.github.io/. Some of my favorite articles include:
   - https://lexi-lambda.github.io/blog/2020/11/01/names-are-not-type-safety/
@@ -66,11 +70,21 @@ choosing a particular programming language:
 https://www.microsoft.com/en-us/research/wp-content/uploads/2016/07/history.pdf 
 
 ## Misc
-- Get in the habit of reading Hacker News: https://news.ycombinator.com/ (or
+### Hacker News
+Get in the habit of reading Hacker News: https://news.ycombinator.com/ (or use
 https://hckrnews.com/ for a nicer UI). It's an online community of technical
-professionals. You can find all kinds of great articles/blogs (about
-programming and other things). We've found all the best blogs we know on Hacker
-news.
+professionals.
+
+You can find all kinds of great articles/blogs (about programming and other
+things). We've found all the best blogs we know on Hacker news.
+
+People share things they like and other people upvote and comment on it.
+Classic online community stuff, but this one is a little more sophisticated
+than your average subreddit.
+
+For searching Hacker news, you can use this: https://hn.algolia.com/
+
+### Other blogs
 - Some other (non-Haskell) blogs I like:
   - https://www.joelonsoftware.com/ (check his "Top 10")
   - https://jvns.ca/
