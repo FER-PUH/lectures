@@ -9,7 +9,7 @@ LECTURE 14: Monads 2
 
 v1.0
 
-(c) 2024 Jan Šnajder, Mihovil Ilakovac
+(c) 2025 Jan Šnajder, Mihovil Ilakovac
 
 ==============================================================================
 
@@ -233,6 +233,73 @@ Solve the following problems in the state monad 'SM s a'.
     threeRandoms :: SM g (Int,Int,Int)
   that returns three random numbers.
 
+== LIST MONAD ================================================================
+
+A list (more precisely: the '[]' type constructor) is also a monad instance. It
+is defined as follows:
+
+  instance Monad [] where
+    return x = [x]
+    xs >>= f = concat (map f xs)
+    fail _ = []
+
+m1 >> m2 = m1 >>= \_ -> m2
+
+The (>>=) operator simply maps the function 'f' over the given list as its
+left argument. Because 'f' itself returns a list, we end up with a list of
+lists, which we than flatten out into a single list using 'concat'. For
+example:
+
+> l1 = [1, 2, 3] >>= \x -> [x, x^2]
+
+This is equivalent to:
+
+> l2 = do
+>   x <- [1,2,3]
+>   [x, x^2]
+
+which probably is more readable.
+
+What about the following computation?
+
+> l3 = [1,2,3] >> [4,5,6]
+
+This is equivalent to:
+
+> l3' = [1,2,3] >>= \_ -> [4,5,6]
+
+Another example:
+
+> tuples = do
+>   n <- [1..10]
+>   c <- "abc"
+>   return (n, c)
+
+We end up with a list of pairs (Cartesian product [1..10]*"abc"). 
+Does this look a little familiar?
+
+> tuples' = [(n,c) | n <- [1..10], c <- "abc"]
+
+We now see that a list comprehension is just syntactic sugar for the list monad:
+
+Here's a fully desguared version:
+
+> tuples'' = [1..10] >>= \n -> "abc" >>= \c -> return (n, c)
+
+What is the following function doing?
+
+> fooo [] = [[]]
+> fooo xs = do
+>   x <- xs
+>   ys <- fooo (delete x xs)
+>   return (x:ys)
+
+> tuples2 = do
+>   n <- [1..10]
+>   guard $ n >= 5
+>   c <- "abc"
+>   return (n, c)
+
 == FUNCTIONS FOR WORKING WITH MONADS =========================================
 
 We've already encountered a couple of useful functions for working with monads
@@ -304,8 +371,16 @@ function when the data flow is from right to left, as is the case with
 functional composition in pure code. Therefore, this operators makes sense when
 we mix pure and monadic code. For example:
 
-> main5 =
->   putStr . unlines . filter (not . null) . lines =<< getContents
+> main5 foo=
+>   putStr . unlines . filter (not . null) . lines =<< readFile foo
+
+Or, if you prefer, left to right...
+
+> (.>) :: (a -> b) -> (b -> c) -> a -> c
+> (.>) = flip (.)
+
+> main5' foo = 
+>   readFile foo >>= lines .> filter (not . null) .> unlines .> putStr
 
 The function
 
@@ -437,3 +512,4 @@ Another example: evaluation of an arithmetic expression.
 > eval (Div e1 e2) = case eval e2 of
 >   Just 0 -> Nothing
 >   e      -> liftM2 (/) (eval e1) e
+
