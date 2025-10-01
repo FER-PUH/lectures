@@ -75,7 +75,7 @@ Length will give you the length of a string:
 
 === IF-THEN-ELSE =============================================================
 
-> condDec x = if x > 0 then x - 1 else x 
+> condDec x = if x > 0 then x - 1 else x
 
 > foo x = (if even x then x*2 else 2) + 1
 
@@ -92,16 +92,16 @@ expression.
 
 Playing with strings a bit:
 
-> compareStrings s1 s2 = 
+> compareStrings s1 s2 =
 >   s1 ++ " comes " ++ (if s1 < s2 then "before " else "after ") ++ s2
 
 === GUARDS ===================================================================
 
-> compareStrings' s1 s2 
+> compareStrings' s1 s2
 >   | s1 < s2   = s1 ++ " comes before " ++ s2
 >   | otherwise = s1 ++ " comes after " ++ s2
 
-> grade score 
+> grade score
 >   | score < 50 = 1
 >   | score < 63 = 2
 >   | score < 76 = 3
@@ -109,13 +109,13 @@ Playing with strings a bit:
 >   | otherwise  = 5
 
 > showSalary amount bonus
->   | bonus /= 0 = "Salary is " ++ show amount ++ ", and a bonus " ++ 
->                  show bonus 
+>   | bonus /= 0 = "Salary is " ++ show amount ++ ", and a bonus " ++
+>                  show bonus
 >   | otherwise  = "Salary is " ++ show amount
 
 === EXERCISE 1 ===============================================================
 
-1.1. 
+1.1.
 
 - Define 'concat3' that concatenates three strings, but drops the middle one
   if it's shorter than 2 characters (use 'length' function).
