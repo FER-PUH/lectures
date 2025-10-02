@@ -285,6 +285,7 @@ null [1,2]  == False
 ```
 
 👉 Prefer `null xs` over `length xs == 0`  *(works for infinite lists)*
+
 👉 Prefer `null xs` over `xs == []`  *(works for all containers, no `==` needed on elements)*
 
 ---
