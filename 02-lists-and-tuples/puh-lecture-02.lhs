@@ -24,12 +24,6 @@ v1.1
 - run `ghci` in your terminal
   - `:l some/path/lecture2.hs` to load your Haskell script for the first time
   - `:r` to reload the file when you do changes
-  - demo: https://discord.com/channels/947985530841337856/1152372711537004576/1161743495103524986
-
-- you can use and run any functions from the file
-
-- tip: "poor man's tests": define helper functions to test your code
-  demo: https://discord.com/channels/947985530841337856/1152372711537004576/1161743764168134687
 
 ===
 
