@@ -170,6 +170,11 @@ Polymorphic functions: 'head', 'last', 'tail', 'fst', 'length', 'take', 'drop',
 
 Variables 'a', 'b', etc. (written in lowercase) are called TYPE VARIABLES.
 
+> listify :: a -> [a]
+> listify x = [x]
+
+How would this look in other languages, e.g., Java.
+
 > listifySnd :: (a, b) -> [b]
 > listifySnd p = [snd p]
 
@@ -445,6 +450,4 @@ functions:
 
 So far we've only written simple functions. Haskell syntax is more
 sophisticated than what we've seen so far. Next, we'll look into pattern
-matching and local definitions. Also, we'll take a look into how to set up a
-Haskell project and package it using Cabal.
-
+matching and local definitions.
