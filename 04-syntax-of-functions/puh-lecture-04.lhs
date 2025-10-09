@@ -408,8 +408,6 @@ Or shorter:
 Use 'let' when you need a "very local" definition that is not used at several
 places within a function.
 
-Note that 'let' has actually nothing to do with 'let' in REPL, although
-in both cases they serve the same purpose: assigning values to a variable.
 
 'let' (without the 'in' part) can also be used within a list comprehension:
 
