@@ -395,7 +395,7 @@ constant of type '(Bounded a) => a'.
 
 :t 100
 
-Integer types are polymorphic constants. They can assume every numeric type
+Integer literals are polymorphic constants. They can assume every numeric type
 depending on the context:
 
 100 :: Int
