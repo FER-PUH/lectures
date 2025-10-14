@@ -66,7 +66,7 @@ Haskellers are quite proud of the quicksort definition:
 > quicksort :: Ord a => [a] -> [a]
 > quicksort [] = []
 > quicksort (x : xs) = quicksort lesser ++ [x] ++ quicksort greater
->   where lesser = [y | y <- xs, y <= x]
+>   where lesser  = [y | y <- xs, y <= x]
 >         greater = [y | y <- xs, y  > x]
 
 == STRUCTURAL RECURSION ======================================================
@@ -101,6 +101,7 @@ pattern matching, and combine the results:
 > concat' (xs : xss) = xs ++ concat' xss
 
 > maximum' :: Ord a => [a] -> a
+> maximum' []      = error "Empty list"
 > maximum' [x]     = x
 > maximum' (x :xs) = max x (maximum' xs)
 
@@ -119,6 +120,8 @@ foo (x : xs) = f x `operator` foo xs  <-- general case
 
 1.1.
 - Define a recursive function to compute the product of a list of elements.
+  product' :: (Num a) => [a] -> a
+  product' [1,2,0] => 0
 
 1.2.
 - Define a recursive function 'headsOf' that takes a list of lists and
@@ -150,6 +153,8 @@ We need an extra argument to "carry" some state while we traverse the list:
 > incIncList :: Num a => a -> [a] -> [a]
 > incIncList _ []       = []
 > incIncList n (x : xs) = x + n : incIncList (n + 1) xs
+
+Arguments that change in a recursive calls are called ACCUMULATORS.
 
 To make the function more ergonimic and spare the caller from having to always
 provide 0 as the first argument, we can define a WRAPPER FUNCTION:
@@ -183,7 +188,7 @@ numbers in a list:
 > countPositives :: (Num a, Ord a) => [a] -> Int
 > countPositives [] = 0
 > countPositives (x : xs)
->  | x >= 0 = 1 + countPositives xs
+>  | x >= 0    = 1 + countPositives xs 
 >  | otherwise = countPositives xs
 
 == EXERCISE 3 ================================================================
