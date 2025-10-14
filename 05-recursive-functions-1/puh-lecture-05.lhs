@@ -276,7 +276,7 @@ How can we extend this so that it only pairs up (x,y) where x==y?
 > zipEquals [] _ = []
 > zipEquals _ [] = []
 > zipEquals (x : xs) (y : ys)
->   | x == y = (x, y) : zipEquals xs ys
+>   | x == y    = (x, y) : zipEquals xs ys
 >   | otherwise = zipEquals xs ys
 
 We don't always need to process the elements one by one. For example, a
