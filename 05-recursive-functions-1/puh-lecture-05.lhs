@@ -199,7 +199,7 @@ numbers in a list:
   equalTriplets [(1,2,3),(2,2,2),(4,5,6)] => [(2,2,2)]
 
 3.2.
-- Define your own version of the `replicate`` function. Implement it using
+- Define your own version of the `replicate` function. Implement it using
   recursion (not using the `repeat` function from Prelude).
   replicate' :: Int -> a -> [a]
   replicate' 3 7 => [7,7,7]
