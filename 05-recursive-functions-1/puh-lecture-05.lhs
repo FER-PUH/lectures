@@ -9,7 +9,7 @@ LECTURE 5: Recursive functions 1
 
 v1.2
 
-(c) 2017 Jan Snajder, 2022 Matija Sosic, 2023 Filip Sodic
+(c) 2017 Jan Snajder, 2022 Matija Sosic, 2023 Filip Sodic, 2025 Franjo Mindek
 
 ==============================================================================
 
