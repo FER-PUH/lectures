@@ -96,9 +96,9 @@ OPTIONAL: Read more about tail recursion:
     http://www.haskell.org/pipermail/haskell-cafe/2009-March/058607.html
   - Stack overflow explanation: https://stackoverflow.com/a/37010
 
-But why would we want to write tail-recurisve functions? Isn't it all the same?
+But why would we want to write tail-recursive functions? Isn't it all the same?
 
-Not necessarily. Tail-recursive definitions can be more preformant (generally
+Not necessarily. Tail-recursive definitions can be more performant (generally
 in terms of memory, but sometimes also in terms of time).
 
 Let's first see how tail recursion affects time complexity by looking at the
@@ -123,7 +123,7 @@ More on reversing lists in Haskell: https://stackoverflow.com/a/26847373
   
 How does tail recursion affect space complexity?
 
-To calculate a value of an expression containing a recursive function call, we
+To calculate the value of an expression containing a recursive function call, we
 must first perform this call and obtain its value (as was the case with
 'fact1'). We can only evaluate the rest of the expression after returning from
 the recursive call. Conceptually, this means that recursive expressions
@@ -206,7 +206,7 @@ Here's a standard version of a `listMaximum` function.
 
 1.1.
 
-- Define a tail recursive version of `listMaximum` called `tailMaximum`.
+- Define a tail-recursive version of `listMaximum` called `tailMaximum`.
 
   Is your function less polymorphic than non-tail recursive `listMaximum`?
   Which calls can you make, and which calls throw compile errors:
@@ -270,7 +270,7 @@ But this again doesn't work because of the same reason: we end up with lists in
 reverse order. We could reverse the input list first, but that would require
 two list traversals (one for the reversal and one for unzipping).
 
-Hence in this case too we should resort to "traditional" recursion:
+Hence, in this case too, we should resort to "traditional" recursion:
 
 > unzip'' :: [(a,b)] -> ([a],[b])
 > unzip'' [] = ([], [])
@@ -290,14 +290,14 @@ constructor and delay the recursive call until it's needed.
 
 Notice that guarded recursion is not tail-recursive. However, there is nothing
 left to be done after exiting the recursive call, so space complexity is O(1).
-Hence we call such recursion TAIL RECURSION MODULO CONS.
+Hence, we call such recursion TAIL RECURSION MODULO CONS.
 
 Guarded recursion is the reason why Haskell's concatenation operator is so
 efficient:
 
 > plusplus :: [a] -> [a] -> [a]
 > plusplus [] list2 = list2
-> plusplus (x:xs) list2 =  x : plusplus xs list2
+> plusplus (x:xs) list2 = x : plusplus xs list2
 
 Real definition of the cons operator ('++'):
 https://hackage.haskell.org/package/base-4.17.0.0/docs/src/GHC.Base.html#%2B%2B
@@ -341,7 +341,7 @@ Will enter an infinite loop regardless of what 'f' does with its arguments.
 
 A PROGRAMMING LANGUAGE IS STRICT if all user-defined functions are strict
 (e.g., C, Java, Python).
-Why emphasize user-defined functions? Becuase most strict languages have a
+Why emphasize user-defined functions? Because most strict languages have a
 couple of built-in non-strict constructs. The expression (in let's
 say C):
 
@@ -357,7 +357,7 @@ and throwing away unneeded results.
 
 Lazy evaluation in Haskell means that each expression is evaluated:
  - Only when it's needed (e.g., someone wants to consume the result).
- - Only enough (e.g., only the beggining of the list if you need head).
+ - Only enough (e.g., only the beginning of the list if you need head).
  - Only once (e.g., evaluation replaces the thunk with the result).
 
 Therefore, saying that Haskell is a non-strict lazy language means that Haskell
@@ -476,7 +476,7 @@ OPTIONAL: Read more on 'seq':
 
 2.1.
 
-- Define a strict verion of of `tailMaximum`. Compare its memory footprint to the
+- Define a strict version of `tailMaximum`. Compare its memory footprint to the
   non-strict version on large inputs:
       :set +s 
       tailMaximumStrict [1..1000000]

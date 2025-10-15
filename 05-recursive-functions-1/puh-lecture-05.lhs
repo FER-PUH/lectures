@@ -333,7 +333,7 @@ Another function is 'unzip':
 == CORECURSION ===============================================================
 
 Corecursion is "dual" to recursion: Recursive functions are functions expressed
-in terms of themselves, and corecursive variables are variabels expressed in
+in terms of themselves, and corecursive variables are variables expressed in
 terms of themselves.
 
 Instead of decomposing a structure, we build it up. In RECURSION, each recursive
