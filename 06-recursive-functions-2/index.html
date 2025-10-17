@@ -1,0 +1,29 @@
+<!--
+  A simple demonstration of a function that generates a "lazy" list of numbers
+  from n to 0 in JS.
+
+  This should somewhat illustrate the idea of "thunks" to you who are familiar
+  with JS.
+
+  Anyway, the way we'd write this in Haskell is:
+
+  listFromN :: ( Enum n , Num n ) => n -> [ n ]
+  listFromN n = [n, pred n .. 0 ]
+
+  Or using a direct guarded recursion:
+
+  listFromN' :: ( Enum n , Num n , Eq n ) => n -> [ n ]
+  listFromN' 0 = [0]
+  listFromN' n = n : listFromN' ( pred n )
+
+  To play with this example, open it in your web browser and call the function
+  from the browser console.
+-->
+<script type="text/javascript">
+  function listFromN( n ) {
+    if ( n <= 0 )
+      return ( { elem : 0 , rest : null } )
+
+    return ( { elem : n , rest : () => listFromN( n - 1 ) } )
+  }
+</script>
