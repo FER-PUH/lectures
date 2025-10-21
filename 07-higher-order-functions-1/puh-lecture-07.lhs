@@ -505,7 +505,7 @@ but this only makes the code less readable.
   elements that fall within the [n,m] interval.
 
 5.2
-- Define 'canoinicalizePairs' that takes a list of pairs and returns a list of
+- Define 'canonicalizePairs' that takes a list of pairs and returns a list of
   pairs with the order of elements switched so that the first element of the
   pair is smaller than the second one. Filter out any pair that has the
   first element equal to the second element
