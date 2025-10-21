@@ -69,7 +69,7 @@ function:
 
 > add x y = x + y
 
-this gets desugared to 
+this gets desugared to
 
 > desugaredAdd = \x y -> x + y
 
@@ -218,7 +218,7 @@ We can do the same with binary functions that are not defined as operators:
 
 === EXERCISE 1 ===============================================================
 
-Define the following functions using partial application of existing 
+Define the following functions using partial application of existing
 functions:
 
 1.1.
@@ -283,7 +283,7 @@ A pair of functions imported from 'Data.Tuple'.
 > curry f a b = f (a,b)
 
 > uncurry :: (a -> b -> c) -> (a, b) -> c
-> uncurry f (a,b) = f a b 
+> uncurry f (a,b) = f a b
 
 > uncurryPlus = uncurry (+)
 > regularPlus = curry uncurryPlus
@@ -384,7 +384,7 @@ Write the following functions using 'map'.
 
 Consider the following function:
 
-> evenNumbers :: Integral a => [a] -> [a] 
+> evenNumbers :: Integral a => [a] -> [a]
 > evenNumbers [] = []
 > evenNumbers (x:xs)
 >   | even x    = x : evenNumbers xs
@@ -468,7 +468,7 @@ Another example: instead of
 
 we can define
 
-> camelCase''' s = 
+> camelCase''' s =
 >  concatMap (\(h:t) -> toUpper h : t) $ words s
 
 REMARK 1: If pattern matching within a lambda expression fails, we get a
@@ -513,7 +513,7 @@ but this only makes the code less readable.
   canonicalizePairs [(4,1), (2,2), (1,5)] => [(1,4), (1,5)]
 
 5.3
-- Define 'applyAndCombine': a function that takes two unary functions, applies 
+- Define 'applyAndCombine': a function that takes two unary functions, applies
   some input to them returns and combines the results into a result pair.
   applyAndCombine :: (a -> b) -> (a -> c) -> a -> (b, c)
   applyAndCombine (+2) (*3) 5 => (7, 15)

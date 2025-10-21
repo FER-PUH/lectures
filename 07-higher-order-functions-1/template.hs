@@ -1,77 +1,53 @@
-import Data.Char
 import Data.List
-import Data.Tuple
 
 -- Exercise 1
 
 -- 1.1.
-takeThree :: [a] -> [a]
-takeThree xs = undefined
-
-dropThree :: [a] -> [a]
-dropThree xs = undefined
-
-hundredTimes :: a -> [a]
-hundredTimes xs = undefined
 
 -- 1.2.
-index :: [a] -> [(Int, a)]
-index xs = undefined
+-- >>> index "xyz"
 
 -- 1.3.
-divider :: Int -> String
-divider n = undefined
+-- >>> divider 3
 
 -- Exercise 2
 
--- 2.1.
-applyOnLast :: (a -> b -> c) -> [a] -> [b] -> c
-applyOnLast = undefined
+addThree :: (Num a) => a -> a -> a -> a
+addThree x y z = x + y + z
 
-lastTwoPlus100 :: (Num a) => [a] -> [a] -> a
-lastTwoPlus100 = undefined
+-- 2.1.
+-- >>> applyOnLast (+) [1, 2, 3] [5, 6]
+
+-- >>> applyOnLast max [1, 2] [3, 4]
 
 -- 2.2.
-applyManyTimes :: Int -> (a -> a) -> a -> a
-applyManyTimes = undefined
-
-applyTwice' :: (a -> a) -> a -> a
-applyTwice' = undefined
+-- >>> lastTwoPlus100 [1, 2, 3] [6, 5]
 
 -- Exercise 3
 
 -- 3.1.
-listifyList :: [a] -> [[a]]
-listifyList = undefined
+-- >>> listifyList [1, 2, 3]
 
 -- 3.2.
-cutoff :: Int -> [Int] -> [Int]
-cutoff = undefined
+-- >>> cutoff 100 [20, 202, 34, 117]
 
 -- Exercise 4
 
 -- 4.1.
-sumEvenSquares :: [Integer] -> Integer
-sumEvenSquares = undefined
+-- >>> sumEvenSquares [1, 2, 3, 4]
 
 -- 4.2.
-freq :: (Eq a) => a -> [a] -> Int
-freq = undefined
+-- >>> freq 'k' "kikiriki"
 
 -- 4.3.
-freqFilter :: (Eq a) => Int -> [a] -> [a]
-freqFilter = undefined
+-- >>> freqFilter 4 "kikiriki"
 
 -- Exercise 5
 
 -- 5.1.
-withinInterval :: Int -> Int -> [Int] -> [Int]
-withinInterval = undefined
 
 -- 5.2.
-canonicalizePairs :: (Ord a) => [(a, a)] -> [(a, a)]
-canonicalizePairs = undefined
+-- >>> canonicalizePairs [(4, 1), (2, 2), (1, 5)]
 
 -- 5.3.
-applyAndCombine :: (a -> b) -> (a -> c) -> a -> (b, c)
-applyAndCombine = undefined
+-- >>> applyAndCombine (+ 2) (* 3) 5
