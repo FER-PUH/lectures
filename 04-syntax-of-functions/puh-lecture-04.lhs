@@ -333,7 +333,7 @@ and when should I use global definitions instead?
 
 Good reasons FOR using 'where':
 * Use 'where' if an expression is being repeated locally.
-* Use 'where' if this makes your code more comprehensive.
+* Use 'where' if this makes your code more comprehensible.
 * Use 'where' as a sort of documentation (assuming that the variables/functions
   have meaningful names).
 
