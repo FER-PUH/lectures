@@ -66,7 +66,7 @@ Recall the 'caesarCode' function. Let's look at three ways how to define it:
 > caesarCode3 :: String -> String
 > caesarCode3 = map succ . filter (/=' ')
 
-What should we prefer, list comprehensions or compositoins? Why?
+What should we prefer, list comprehensions or compositions? Why?
 We will talk about when and when not to eta reduce in a bit.
 
 Here's another function from the previous lecture:
@@ -200,7 +200,7 @@ It's usually the first one. Here are some more examples:
 
 > type Name = String
 > type Age = Int
-> type Person = (String, Int)
+> type Person = (Name, Age)
 >
 > getAdults :: [Person] -> [Person]
 > getAdults = filter ((>=18) . snd)
@@ -567,7 +567,7 @@ can use 'foldl1'. E.g.:
 > maximum5 = foldl1 max
 
 Unfortunately, 'foldl' is not strict and thus suffers from the same issue as
-all non-strict tail-recurisve functions. In other words, It's a great fit for
+all non-strict tail-recursive functions. In other words, It's a great fit for
 some problems (like reversing lists) but does not save any memory when
 performing "real" reductions (e.g., sum, product, max, etc.).
 We therefore need a way to make it strict. Fortunately, the function
