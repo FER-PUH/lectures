@@ -254,7 +254,7 @@ have to construct a new value based on the old one:
 2.1
 - What should be the type for the 'Color' eliminator?
 
-> color :: a
+> color :: ( RGB -> RGB -> RGB -> a ) -> Color -> a
 
 2.2
 - Implement the 'Color' eliminator 'color'.
