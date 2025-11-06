@@ -1,491 +1,677 @@
+> {-# LANGUAGE RecordWildCards #-}
+> {-# LANGUAGE OverloadedRecordDot #-}
+> {-# LANGUAGE DuplicateRecordFields #-}
+
 University of Zagreb
 Faculty of Electrical Engineering and Computing
 
 PROGRAMMING IN HASKELL
 
-Academic Year 2017/2018
+Academic Year 2025/2026
 
 LECTURE 9: Custom data types 1
 
 v1.0
 
-(c) 2017 Jan Šnajder
+(c) 2025 Luka Hadžiegrić
 
-==============================================================================
+================================================================================
 
-> {-# OPTIONS_GHC -Wno-missing-fields #-}
->
-> import Data.List
+> module Lecture09 where
 
-=== RECAP ====================================================================
+=== INTRODUCTION ===============================================================
 
-In the first half of the course, we focused on functions: we learned how to
-define them in various ways, how to define higher order functions, how to use
-these to abstract useful functional patterns, and how to combine them into more
-complex functions. However, we restricted ourselves to using standard built-in
-types. In real-life scenarios, we will need to define more complex types, even
-recursive types. Today, we start looking into custom data types.
+So far we've mostly been focused on the basic language syntax, different types
+of functions and ways to compose them, some useful patterns like map and fold,
+and we've explored the lazy semantics and have mentioned purity. Besides a
+different syntax, most of these concepts are perfectly applicable to many other
+programming languages and are really nothing new. What makes Haskell really
+stand out among it's peers is it's very expressive type system based on solid
+theoretical principles.
 
-=== DATA TYPES ===============================================================
+In our previous lessons we've mostly stuck to the basic data types you may find
+in other programming languages. They are so seemingly plain that some very
+misguided people advocate against having any types at all.
 
-> data Tricolor = Red | Green | Blue
+During this lesson we'll see that there's so much more to types than initially
+meets the eye.
 
-'Tricolor' is a new type. 'Red', 'Green', and 'Blue' are DATA CONSTRUCTORS
-The names of types and data constructors are capitalized.
+=== DATA TYPES =================================================================
 
-Let's try this out:
+There's the data and then there are types of data. A string of bytes in memory,
+without knowing what they represent, could be interpreted as pretty much
+anything. Types are what communicates to us and the compiler the intended
+interpretation of the data and what operations make sense on that data.
 
-  ghci> :t Red
+Types only exist during the compilation time. After the compilation we are just
+left with appropriately placed machine instructions that transform the data in
+certain ways.
 
-Data types like this one, in which we explicitly enumerate the possible values,
-are called ALGEBRAIC DATA TYPES.
+Usually types are linked to sets, and the values that inhabit those types to
+members of those sets. However, there's one key difference between the types and
+the sets that makes the Hindley-Milner type system (used in Haskell) so powerful
+and able to infer type of any expression (unless we intentionally weaken the
+inference capabilities).
 
-This is different from defining an alias for an existing type, which we do as
-follows:
+While sets uniquely determine their members, inhabitants of a type uniquely
+determine the type.
 
-> type Word = [Char]
-> type Coord = (Int, Int)
+In other words, when we look at a specific value, in the context of sets we
+cannot uniquely determine which set the value belongs to, as it can be a member
+of multiple sets, while in the context of types we immediately know which type a
+specific value inhabits. This is not exactly true in practice as we'll see in a
+bit, but it is a good piece of intuition to develop a better sense about how
+Haskell's type inference works.
 
-Up until now we've already seen a couple of data types:
+=== ALGEBRAIC DATA TYPES (ADTs) ================================================
 
+One of the Haskell's killer feature are Algebraic Data Types. While they may not
+seem like much initially, they allow for very efficient and effective data
+modeling, as well as making the code more readable and safe.
+
+And, as the name implies, they have algebra hiding behind them.
+
+=== SUM TYPES ==================================================================
+
+Sum types are the most basic way to define a custom type. They resemble enums
+found in other languages.
+
+We've already seen and worked with some predefined sum types:
+
+  data () = ()
   data Bool = False | True
   data Ordering = LT | EQ | GT
+  ( from 'compare :: Ord a => a -> a -> Ordering' )
 
-Let's recall:
+To define a custom data type we start with the keyword 'data' followed by the
+name of our custom type and after the sign '=' we list custom values that
+inhabit the type separated with the '|' symbol.
 
-  compare :: Ord a => a -> a -> Ordering
+We can define our own data type like so:
 
-We can of course use our custom data types when we define new functions:
+> data UDT = Uno | Dos | Tres
 
-> warmColor :: Tricolor -> Bool
-> warmColor Red = True
-> warmColor _   = False
+It is important to note that the names of custom types and values must begin
+with an uppercase letter!
 
-> myColor = Red
+To confirm that we were indeed successful we can try to determine the type of
+one of the values:
 
-What happens if we try to evaluate the value of 'myColor' in ghci?
+ghci> :t Uno
+Uno :: UDT
 
-The value cannot be shown because its type is not a member of the 'Show' type
-class. We can fix this easily:
+If we enter 'False' into the GHCi and press enter, we'll get 'False' written out
+to the console, however if we try to do the same with one of the 'UDT' values
+we'll see this error:
 
-> data Tricolor' = Red' | Green' | Blue'
->  deriving Show
+ghci> Uno
 
-This makes the `Tricolor'` type a member of the 'Show' type class (more
-precisely, it automatically derives an instance of the 'Show' class for this
-type).
+<interactive>:7:1: error: [GHC-39999]
+    • No instance for ‘Show UDT’ arising from a use of ‘print’
+    • In a stmt of an interactive GHCi command: print it
 
-> myColor' = Red'
+This is because in order to display values, GHCi requires the type to implement
+the 'Show' interface and the 'show' function. We don't know yet how to write an
+instance of a type class, but we can write the following function:
 
-IMPORTANT: Data constructors must be unique! The same data constructor cannot
-be used to define different types. This won't work:
+> showUDT :: UDT -> String
+> showUDT Uno = "Uno"
+> showUDT Dos = "Dos"
+> showUDT Tres = "Tres"
 
-  data Tricolor = Red | Green | Blue
-  data WarmColors = Red | Orange | Yellow
+Easy! Now we can "show" our 'UDT' values in the GHCi:
 
-The constructors 'Red', 'Green', and 'Blue' are actually values. We call such
-constructors NULLARY CONSTRUCTORS. A type that only contains nullary
-constructors is similar to ENUMERATIONS in other programming languages.
+ghci> showUDT Uno
+"Uno"
 
-But constructors can also be binary, ternary, etc. E.g., (example taken from
-LYAHFGG):
+Of course, this is a bit silly since it doesn't integrate with GHCi and the
+broader ecosystem of functions in the 'Prelude' like 'read' and 'print'.
 
-> data Shape =
->     Circle Double Double Double
->   | Rectangle Double Double Double Double
->   deriving Show
+Fortunately, Haskell is smart, and it can derive those instances for us. Let's
+do just that with our next equally imaginative type:
 
-'Circle' is a ternary constructor: it takes three real numbers (the coordinates
-and the radius). 'Rectangle' is a quaternary constructor: it takes four numbers
-(two pairs of coordinates).
+> data RGB = Red | Green | Blue
+>   deriving ( Eq , Show , Read )
 
-This reveals that data constructors are actually functions. What is the type of
-the 'Circle' constructor?
+We can use the word 'deriving' followed by the parentheses with comma separated
+list of supported type classes we want to have automatically derived. With these
+we can now convert our value into a string, convert a string into our value and
+check if the two values of our types are equal:
 
-We can also pattern match against constructors with multiple arguments:
+ghci> :t Red
+Red :: RGB
 
-> isCircle :: Shape -> Bool
-> isCircle (Circle _ _ _) = True
-> isCircle _              = False
+ghci> Red
+Red
 
-Btw., we could also have defined:
+ghci> show Red
+"Red"
 
-  data Shape =
-      Circle (Float, Float) Float
-    | Rectangle (Float, Float) (Float, Float)
+ghci> read "Red" :: RGB
+Red
 
-Let's look at some examples of functions (and values) that use 'Circle' and
-'Rectangle' types:
+After all of this. Let's ask ourselves why are these types called the sum types?
+It is because of the number of their inhabitants. We just sum them / add them
+together. We call the number of inhabitants of a type cardinality.
 
-> myCircle = Circle 5 5 10
-> myRectangle = Rectangle 10 10 100 200
-> unitCircle x y = Circle x y 1
+With that in mind, we can determine the cardinality of types we've seen so far:
 
-A function to compute the area of a shape:
+  card () = () = 1
+  card Bool = False | True = 1 + 1 = 2
+  card Ordering = LT | EQ | GT = 1 + 1 + 1 = 3
 
-> area :: Shape -> Double
-> area (Circle _ _ r)          = r ^ 2 * pi
-> area (Rectangle x1 y1 x2 y2) = abs $ (x1 - x2) * (y1 - y2)
+We'll see a bit later how this fits into the big picture.
 
-Because data constructors 'Circle' and 'Rectangle' give values of the same
-type, those values can be combined in a single list:
+One interesting thing about ADTs is that pattern matching didn't exist since
+their conception. The original idea was that when you'd define a custom type
+you'd also get a function to consume that type.
 
-> myShapes = [myCircle, myRectangle, unitCircle 0 0, Rectangle 0 0 5 5]
+Those functions are called eliminators as they "eliminate" a value. One such
+example is the 'bool' function from 'Data.Bool' module. Here's it's
+implementation:
 
-This is actually how one circumvents the problem of not being able to construct
-heterogeneous lists in Haskell.
+> bool :: a -> a -> Bool -> a
+> bool f _ False = f
+> bool _ t True  = t
 
-We can now define:
+They can be really convenient as, unlike pattern matching, we can partially
+apply them and compose them with other functions.
 
-> totalArea :: [Shape] -> Double
-> totalArea = sum . map area
+As you can see, we choose the first or the second argument based on the concrete
+value of the third argument. We have of course used pattern matching to
+implement the function itself. But that's because the compiler doesn't provide
+it automatically for us when we define the type.
 
-A somewhat better approach to define the above types:
-
-> data Point = Point Double Double
->   deriving Show
-> data Shape2 = Circle2 Point Double | Rectangle2 Point Point
->   deriving Show
-
-Note that we use 'Point' as both a type name and a data constructor. This is
-totally OK (and in fact common for types with only one data constructor).
-
-> myCircle2 = Circle2 (Point 5 5) 10
-> myRectangle2 = Rectangle2 (Point 10 10) (Point 10 10)
-
-> area2 :: Shape2 -> Double
-> area2 (Circle2 _ r) = r ^ 2 * pi
-> area2 (Rectangle2 (Point x1 y1) (Point x2 y2)) =
->   abs $ (x1 - x2) * (y1 - y2)
-
-=== EXERCISE 1 ===============================================================
+=== EXERCISE 1 =================================================================
 
 1.1.
-- Define a 'Date' structure with the appropriate fields.
-- Define a function that shows a date in the DD.MM.YYYY format (without
-  leading zeroes).
-showDate :: Date -> String
+- Write an eliminator for our RGB data type (write the type signature first).
+
+> rgb = undefined
 
 1.2.
-- Define a function
-  translate :: Point -> Shape2 -> Shape2
-  that translates a shape into the direction of vector (x,y).
+- Implement the 'showRGB' function in terms of the 'rgb' eliminator.
 
-1.3.
-- Write a function 'inShape' that tests whether a point is contained within a
-  given shape (or is on its border).
-  inShape :: Point -> Shape2 -> Bool
-- Write a function 'inShapes' that tests if the point is within any shape from
-  the list of shapes.
-  inShapes :: Point -> [Shape2] -> Bool
+> showRGB = undefined
 
-1.4.
-- Define your type 'Vehicle' that can be a 'Car', 'Truck',
-  'Motorcycle', or 'Bicycle'. The first three store a name of the manufacturer
-  (String) and horsepower (Double).
-- Write a function 'totalHorsepower' that adds up the horsepower of the
-  vehicles, assuming that bicycle's horsepower is 0.2.
+=== PRODUCT TYPES ==============================================================
 
-=== RECORDS ==================================================================
+Dual to sum types are product types. As their name implies, their cardinality
+somehow relates to products of cardinalities of other types. We've already seen
+a canonical product type in the form of a tuple, but we'll explore them more
+carefully a bit later.
 
-> data Level    = Bachelor | Master | PhD deriving (Show, Eq)
-> data Student2 = Student2 String String String Level Double deriving Show
+For now, let's define our own specialized triple for holding a mix of three
+colors.
 
-> firstName2 :: Student2 -> String
-> firstName2 (Student2 f _ _ _ _) = f
+> data Color = Color RGB RGB RGB
+>   deriving ( Eq , Show , Read )
 
-> lastName2 :: Student2 -> String
-> lastName2  (Student2 _ l _ _ _) = l
+This is a slightly different from the sum types as we don't really have "static"
+values that we can use immediately. Instead, we get a value constructor.
 
-> studentId2 :: Student2 -> String
-> studentId2 (Student2 _ _ i _ _) = i
+     Data Type       Field Types
+         |            |   |   |
+         v            v   v   v
+  data Color = Color RGB RGB RGB
+                 ^
+                 |
+         Value Constructor
 
-This is somewhat tedious and long-winded. It is better to use RECORDS:
+It is a convention to name the value constructor the same name as the type, but
+we could've named it anything we want.
 
-> data Student = Student
->  { firstName  :: String
->  , lastName   :: String
->  , studentId  :: String
->  , level      :: Level
->  , avgGrade   :: Double } deriving Show
+In this case, the 'Color' value constructor is a function that takes three
+'RGB' values and returns, or rather constructs, a value of type 'Color'.
 
-This automatically gives us:
+ghci> :t Color
+Color :: RGB -> RGB -> RGB -> Color
 
-  firstName :: Student -> String
-  lastName  :: Student -> String
-  studentId :: Student -> String
-  level     :: Student -> Level
-  avgGrade  :: Student -> Double
+The cardinality of a product type boils down to a product of cardinalities of
+it's component types. Concretely, our 'Color' data type has a cardinality of
+3 * 3 * 3 = 18, or 18 values that inhabit this type.
 
-We can now define a record like this:
+Here are some concrete examples of values that inhabit the 'Color' type:
 
-> bestStudent = Student
->  { studentId = "0036491215"
->  , firstName = "John", lastName = "Doe"
->  , level = Master, avgGrade = 5.0 }
+> cex1 :: Color
+> cex1 = Color Red Red Red
 
-Let's define a function to show some data from the record:
+> cex2 :: Color
+> cex2 = Color Red Red Green
 
-> showStudent :: Student -> String
-> showStudent s = studentId s ++ " " ++ firstName s ++ " " ++ lastName s
+To consume these values we can again use pattern matching. Let's write three
+functions that access the first, second and third field of the 'Color' data
+type:
 
-or
+> getC1 :: Color -> RGB
+> getC1 ( Color a _ _ ) = a
 
-> showStudent2 :: Student -> String
-> showStudent2 s = unwords [studentId s, firstName s, lastName s]
+> getC2 :: Color -> RGB
+> getC2 ( Color _ b _ ) = b
 
-We can also define it like this:
+> getC3 :: Color -> RGB
+> getC3 ( Color _ _ c ) = c
 
-> showStudent3 :: Student -> String
-> showStudent3 (Student {studentId=id, firstName=f, lastName=l}) =
->   unwords [id, f, l]
+Besides just getting the data from the product types, we may want to update a
+field. Remember that there are no mutations in Haskell. To "update" a value we
+have to construct a new value based on the old one:
 
-Let's write a function to select students whose average grade is above a given
-threshold:
+> setC1 :: Color -> RGB -> Color
+> setC1 ( Color _ b c ) a = Color a b c
 
-> aboveStudents :: Double -> [Student] -> [Student]
-> aboveStudents x = filter ((>= x) . avgGrade)
+> setC2 :: Color -> RGB -> Color
+> setC2 ( Color a _ c ) b = Color a b c
 
-When we define a record, we need not define all fields. Those that we don't
-define will be 'undefined'. The code will compile, but we'll get a warning.
+> setC3 :: Color -> RGB -> Color
+> setC3 ( Color a b _ ) c = Color a b c
 
-> someStudent = Student { firstName = "Marko", avgGrade = 4.3 }
+=== EXERCISE 2 =================================================================
 
-Will 'showStudent someStudent' work?
+2.1
+- What should be the type for the 'Color' eliminator?
 
-Will 'map firstName $ aboveStudents 4.0 [bestStudent, someStudent]' work?
+> color :: a
 
-We can modify field values in a record:
+2.2
+- Implement the 'Color' eliminator 'color'.
 
-> bestStudent2 = bestStudent { avgGrade = 4.9 }
-> someStudent2 = someStudent { lastName = "Markov", studentId = "0036365438" }
+> color = undefined
 
-This is useful when we want to define default values:
+2.3
+- Implement the get and set functions in terms of the 'color' eliminator.
 
-> bachelorStudent = Student { level = Bachelor }
-> masterStudent = Student { level = Master }
-> phdStudent = Student { level = PhD }
+=== RECORDS ====================================================================
 
-> newStudent = bachelorStudent {
->   firstName = "Zoran", lastName = "Zoki",
->   studentId = "00364532350", avgGrade = 4.5 }
+While pattern matching is a nice thing to have, often times we just want to
+access or modify a piece of information within the product type. To do that,
+we've defined getters and setters for our type, however, as you might have
+noticed that's somewhat time consuming and repetitive. The kind of task that's
+best left to a machine.
 
-We can define a record in a shorter way, respecting the order of the fields:
+Haskell has a special syntax for defining custom data types exactly for that
+purpose:
 
-> newStudent2 = Student "Petar" "Perić" "00364542345" Master 3.5
+> data EUR = EUR Float
+>   deriving ( Eq , Show , Read )
 
-=== EXERCISE 2 ===============================================================
+> data Address = Address
+>   { addressStreet   :: String
+>   , addressNumber   :: Int
+>   , addressCity     :: String
+>   , addressCountry  :: String
+>   } deriving ( Eq , Show , Read )
 
-2.1.
-- Define a function that increases the average grade of the student by 1.0,
-  but not above 5.0.
-  improveStudent :: Student -> Student
+> data User = User
+>   { userUUID      :: Int
+>   , userName      :: String
+>   , userSurname   :: String
+>   , userAddress   :: Address
+>   , userAccounts  :: [ Account ]
+>   } deriving ( Eq , Show , Read )
 
-2.2.
-- Write a function to compute the average grade of students for the different
-  study levels.
-  avgGradePerLevels :: [Student] -> (Double, Double, Double)
+> data Account = Account
+>   { accountUUID     :: Int
+>   , accountBalance  :: EUR
+>   } deriving ( Eq , Show , Read )
 
-2.3.
-- Write a function that returns a list of matriculation numbers for a given
-  study level, sorted by average grade in descending order.
-  rankedStudents :: Level -> [Student] -> [String]
+With this syntax we give labels to the fields and automatically get the getter
+functions of the same name:
 
-2.4.
-- Write a function
-  addStudent :: Student -> [Student] -> [Student]
-  that adds a student to a list of students. If a student with an identical
-  matriculation number already exists in the list, the function should return
-  an error.
+  addressStreet :: Address -> String
+  addressNumber :: Address -> Int
+  addressCity :: Address -> String
+  addressCountry :: Address -> String
 
-=== PARAMETRIZED TYPES =======================================================
+  userUUID :: User -> Int
+  userName :: User -> String
+  userSurname :: User -> String
+  userAddress :: User -> Address
+  userAccounts :: User -> [ Account ]
 
-> data OldLevels  = Graduate | Doctorate deriving Show
+  accountUUID :: Account -> Int
+  accountBalance  :: Account -> EUR
 
-> data GeneralStudent a = Student3 String String String a Double deriving Show
+We can still construct the values without mentioning the fields and just relying
+on the argument positioning (not recommended):
 
-'GeneralStudent' has a type parameter 'a'. Depending on what type we choose for
-'a', we will get different types:
+> acc01 :: Account
+> acc01 = Account 5 ( EUR 50000 )
 
-> type BolognaStudent = GeneralStudent Level
-> type FER1Student    = GeneralStudent OldLevels
+However, now we can also be precise about what each value we give actually is.
+This is particularly important in case we ever swap the order of e.g. name and
+surname in the type definition when refactoring.
 
-We call such types, which take parameters as input, TYPE CONSTRUCTORS.
+> acc02 :: Account
+> acc02 = Account { accountUUID = 3 , accountBalance = EUR (-6820) }
 
-Parametrized data types are typically data containers of some sort. E.g.:
+> adr01 :: Address
+> adr01 = Address
+>   { addressStreet   = "Unska"
+>   , addressNumber   = 3
+>   , addressCity     = "Zagreb"
+>   , addressCountry  = "Hrvatska"
+>   }
 
-> newtype MyBox a = InBox a
+> usr01 :: User
+> usr01 = User
+>   { userUUID = 10
+>   , userName = "Tony"
+>   , userSurname = "Hawk"
+>   , userAddress = adr01
+>   , userAccounts = [ acc01 , acc02 ]
+>   }
 
-So, 'MyBox' is a type constructor that we can use to define different types.
-E.g.:
+With this setup, it is now easy to get a value that's deeply nested within a
+record. For example, if we're interested in 'addressNumber' of a 'User' we can
+do the following:
 
-> type StringBox = MyBox String
-> type IntBox    = MyBox Int
+ghci> ( addressNumber . userAddress ) usr01
+3
 
-'InBox' is a data constructor that we can use to construct different values of
-different types. Haskell will automatically determine the correct type:
+Besides defining new values, records also have a syntax for "modifying" values.
+Let's say we want to change the name, street and the city of 'usr01' at the same
+time:
 
-> b1 = InBox 1.2
-> b2 = InBox "Haskell"
-> b3 = InBox (1, 3)
+> usr02 :: User
+> usr02 = usr01
+>   { userName = "Jhonny"
+>   , userAddress = ( userAddress usr01 )
+>     { addressStreet = "Mate Balote"
+>     , addressCity = "Rovinj"
+>     }
+>   }
 
-What are the types of these expressions?
+With the record syntax, some extra pattern matching features are also available:
 
-A better way to accomplish the same:
+> getAccountUUID :: Account -> Int
+> getAccountUUID Account{ accountUUID } = accountUUID
 
-> newtype Box a = Box { unbox :: a } deriving Show
+With this, we can bring only the selected labels into scope as variables instead
+of functions.
 
-A parametrized type can have multiple parameters:
+> getAccountBalance :: Account -> EUR
+> getAccountBalance Account{ accountBalance = bal } = bal
 
-> newtype MyPair a b = MyPair (a, b) deriving Show
+And this piece of syntax allows us to rename the variable to prevent polluting
+the function scope with unwanted names.
 
-So we can have:
+=== EXERCISE 3 =================================================================
 
-  MyPair (1,1) :: MyPair Int Int
-  MyPair ("bla",1.2) :: MyPair String Double
+3.1
+- Using function composition, write a function that returns a total of all
+  'User' 'Account's.
 
-We can, for example, define:
+> accountsTotal :: User -> Float
+> accountsTotal = undefined
 
-> type IntMyPair = MyPair Int Int
-> type MyPairType a = MyPair a String
+=== USEFUL LANGUAGE EXTENSIONS =================================================
 
-A function to take the first element from 'MyPair':
+Even with the record syntax, it can be quite annoying to work with deeply nested
+records. This is why there are several language extensions that can help us with
+that.
 
-> fstMyPair :: MyPair a b -> a
-> fstMyPair (MyPair (x,_)) = x
+Language extensions can be considered "experimental" features that are still in
+the testing phase and can be compiler specific. But, because the GHC is
+basically the only Haskell compiler, it is pretty safe to use most of those
+extensions without worrying about the compatibility.
 
-=== MAYBE TYPE ===============================================================
+We can enable language extensions by writing special comments interpreted by the
+compiler (called pragmas) at the very top of a Haskell file:
 
-Now, there is one very important parametrized type (defined in 'Data.Maybe'):
+{-# LANGUAGE RecordWildCards #-}
+
+The RecordWildCards allows us to use wild card syntax to bring fields into scope
+instead of listing them manually:
+
+> getAccountUUID' :: Account -> EUR
+> getAccountUUID' Account{..} = accountBalance
+
+As well as construct values simply by having the variables with the same name as
+the field labels in scope:
+
+> acc03 :: Account
+> acc03 = Account{..}
+>   where
+>    accountUUID = 5
+>    accountBalance = EUR 15
+
+{-# LANGUAGE OverloadedRecordDot #-}
+
+Syntactic sugar that allows us to access deeply nested fields the same way we
+would in "normal" programming languages:
+
+> exAddrNumber :: Int
+> exAddrNumber = usr01.userAddress.addressNumber
+
+{-# LANGUAGE DuplicateRecordFields #-}
+
+An extension that allows us to have two or more data types in the same module
+that have fields with the same name, without the compiler complaining:
+
+> data Ex01 = Ex01 { field01 :: String , field02 :: Int }
+
+> data Ex02 = Ex02 { field01 :: Char   , field02 :: Bool }
+
+=== SUM OF PRODUCTS ============================================================
+
+We've seen sums, we've seen products, it's only logical that we can sum those
+products.
+
+> data Weird = WeirdNull | WeirdNum Int Bool | WeirdBool Bool
+>   deriving ( Eq , Show , Read )
+
+Cardinality of weird is as follows:
+
+  card Weird = 1 + ( 2^64 * 2 ) + 2 = 36893488147419103000
+
+Quite a number of inhabitants. As you can see, we can combine both products and
+sums into what's called a tagged union.
+
+We can write a simple function that specifies how to "add" two 'Weird' numbers:
+
+> addWeird :: Weird -> Weird -> Weird
+> addWeird WeirdNull          _               = WeirdNull
+> addWeird (WeirdNum  n1 b1) (WeirdNum n2 b2) = WeirdNum (n1 + n2) (b1 && b2)
+> addWeird (WeirdNum  n1 b1) (WeirdBool   b2) = WeirdNum n1 (b1 && b2)
+> addWeird (WeirdBool b1   ) (WeirdNum n2 b2) = WeirdNum n2 (b1 && b2)
+> addWeird (WeirdBool b1   ) (WeirdBool   b2) = WeirdBool (b1 && b2)
+> addWeird _                 _                = WeirdNull
+
+It is also possible to use the record syntax like this:
+
+> data SumRec
+>  = SRNull
+>  | SRA { srFieldA :: Int }
+>  | SRB { srFieldA :: Int , srFieldB :: String }
+>  deriving ( Eq , Show , Read )
+
+This however is not recommended as we now have partial functions:
+
+  srFieldA :: SumRec -> Int
+  srFieldB :: SumRec -> String
+
+Notice that the 'SRNull' is also of type 'SumRec', therefore we get the
+following result:
+
+ghci> srFieldA SRNull
+*** Exception: No match in record selector srFieldA
+
+When using sums of products it is recommended avoiding the record syntax. It is
+much better to simply define another type that you will then add to the tagged
+union, e.g.:
+
+> data SumRec2 = SRAddr Address | SRUser User
+>   deriving ( Eq , Show , Read )
+
+=== PARAMETRIZED TYPES =========================================================
+
+We've already seen a few parametrized types. Namely lists and tuples. They have
+a type parameter for the type of values they'll contain. For now we can think of
+them as "container" types.
+
+Lists we'll explore in the next lesson, but tuples are a canonical example of
+a product type, and we can imagine it's definition is as follows:
+
+  data ( a , b ) = ( a , b )
+
+Besides those two, we have 'Maybe' and 'Either' data types:
 
   data Maybe a = Nothing | Just a
 
-For instance, we can have:
+As you can see, 'Maybe' has two value constructors. One is 'Nothing' indicating
+that there is no value of type 'a', while 'Just' is a constructor that indicates
+a presence.
 
-  Just 5 :: Maybe Int
-  Just "bla" :: Maybe String
-  Just (1,1) :: Maybe (Int, Int)
+You can think of 'Maybe' as the alternative to 'null', except in Haskell,
+unlike in many other programming languages, compiler will warn us in case we
+haven't handled the 'null' possibility.
 
-The 'Maybe' data type is used for situations in which
-(1) a value is optional,
-(2) an error can occur.
+'Maybe', like 'Bool' has it's own eliminator 'maybe' that's imported by default.
+You can also find some useful 'Maybe' utilities in the 'Data.Maybe' module.
 
-CASE 1: Optionality
-
-> data Employee = Employee
->   { name   :: String
->   , salary :: Maybe Double } deriving Show
-
-We can now define:
-
-> showSalary :: Employee -> String
-> showSalary e = case salary e of
->    Nothing -> "unknown"
->    Just n  -> show n ++ " EUR"
-
-A function to concatenate two 'Maybe String':
-
-> concatMaybeStrings :: Maybe String -> Maybe String -> Maybe String
-> concatMaybeStrings (Just s1)  (Just s2)  = Just $ s1 ++ s2
-> concatMaybeStrings s@(Just _) Nothing    = s
-> concatMaybeStrings Nothing    s@(Just _) = s
-> concatMaybeStrings _          _          = Nothing
-
-CASE 2: Error handling
-
-> safeHead :: [a] -> Maybe a
-> safeHead []    = Nothing
-> safeHead (x:_) = Just x
-
-Also useful is the 'Either' type:
+Let's explore the 'Either' data type. 'Either' is the canonical example of a
+sum type, and it's definition is as follows:
 
   data Either a b = Left a | Right b
 
-It is commonly used when we also want to return an error message.
-We return 'Right b' is there was no error, otherwise we return 'Left a', where
-'a' is typically a 'String' (the error message).
+It is quite similar to 'Maybe', except instead of 'Nothing' it has 'Left' that
+can contain a value of type 'a'. Basically, it is a possibility of either one or
+the other value.
 
-> safeHead2 :: [b] -> Either String b
-> safeHead2 []    = Left "empty list"
-> safeHead2 (x:_) = Right x
+It is often used to provide a custom and explicit error message.
 
-=== EXERCISE 3 ===============================================================
+One thing to note about all of these parametrized data types is that they are
+not actually types. They are type constructors, meaning that they become actual
+types only after all of their type arguments have been filled in.
 
-3.1.
-- Define your own parametrized type 'MyTriplet' that contains the values of
-  three different types. Do this using a record.
-- Define a function
-  toTriplet :: MyTriplet a b c -> (a, b, c)
-  that converts a 'MyTriplet' value into an ordinary triplet.
+What we haven't mentioned yet is that types also have types, and we call those
+types "kinds". We can check the kind of a type by using the ':k' command in the
+ghci.
 
-3.2.
-- Define a function totalSalaries :: [Employee] -> Double
-  that sums the known salaries of employees (salaries that are not 'Nothing').
+ghci> :k Int
+Int :: *
 
-3.3.
-- Write a function 'addStudent2' that works like 'addStudent' from problem 2.4
-  but returns a 'Maybe' type instead of an error.
-  addStudent2 :: Student -> [Student] -> Maybe [Student]
-- Write 'addStudent3' that returns an 'Either'.
+As you can see, the kind of 'Int' is '*'. The '*' is deprecated and will be
+replaced by a more meaningful word 'Type' in the future versions of GHC.
 
-=== FMAP =====================================================================
+So, what we see here is that the kind of type 'Int' is a 'Type'. But, what about
+'Maybe'?
 
-Consider the following data structures:
+ghci> :k Maybe
+Maybe :: * -> *
 
-> data Customer = Customer
->   { customerName    :: String
->   , customerAge     :: Int
->   , customerAddress :: Maybe Address }
->   deriving (Eq, Show)
+As you can see, it's kind is 'Type -> Type'. This indicates that for 'Maybe' to
+be a "real" type, we first have to give it some other type. And if we take a
+second look at this "kind signature", we'll notice that this also implies type
+level functions. Can we execute functions on types? Setting this aside, here's
+the kind signature of 'Either':
 
-> data Address  = Address
->   { streetName   :: String
->   , streetNumber :: Int
->   , zipCode      :: String
->   , city         :: String }
->   deriving (Eq, Show)
+ghci> :k Either
+Either :: * -> * -> *
 
-> c1 = Customer "Ivo" 22 (Just $ Address "Bauerova" 10 "10000" "Zagreb")
-> c2 = Customer "Ana" 30 Nothing
+As we can see, it expects two types before it becomes an actual type. If we
+apply e.g. 'Int' to both 'Maybe' and 'Either' we get following:
 
-Let's write a function that returns the city in which a customer lives,
-provided the address is known:
+ghci> :k Maybe Int
+Maybe Int :: *
 
-> customerCity :: Customer -> Maybe String
-> customerCity c = case customerAddress c of
->   Just a  -> Just $ city a
->   Nothing -> Nothing
+ghci> :k Either Int
+Either Int :: * -> *
 
-Similarly, a function that returns a street name and number:
+'Maybe Int' is now a concrete type, while 'Either' is missing one more 'Type'.
 
-> customerStreet :: Customer -> Maybe (String, Int)
-> customerStreet c = case customerAddress c of
->   Just (Address s n _ _) -> Just (s, n)
->   Nothing                -> Nothing
+=== EXERCISE 4 =================================================================
 
-There's a recurring pattern in the above functions: we want to apply some
-function 'f' to a datum wrapped with 'Just' and return 'Just (f x)' or
-'Nothing', if there's no datum. If there is a datum, we need to unwrap it,
-apply a function, and then wrap it up again into 'Just'. There is a function
-that does exactly this:
+4.1
+- Define a safe head using 'Maybe'
 
-  fmap :: (a -> b) -> Maybe a -> Maybe b
-  fmap f (Just x) = Just $ f x
-  fmap _ Nothing  = Nothing
+> safeHead :: [ a ] -> Maybe a
+> safeHead = undefined
 
-(Actually, 'fmap' is not really defined like this, rather a bit more generic,
-but more on this later.)
+4.2
+- Define a function that takes in two lists of numbers and returns either an
+  error message if either one of them is empty, or a sum of the first two
+  elements.
 
-We now can define:
+> elaborateSum :: Num a => [ a ] -> [ a ] -> Either String a
+> elaborateSum = undefined
 
-> customerCity2 :: Customer -> Maybe String
-> customerCity2 = fmap city . customerAddress
+=== THE BIG REVEAL =============================================================
 
-> customerStreet2 :: Customer -> Maybe (String,Int)
-> customerStreet2 =
->   fmap (\(Address s n _ _) -> (s, n)) . customerAddress
+Throughout the lesson we've been thinking about the cardinality of our types. By
+now it should be obvious what the cardinality of e.g. 'Maybe Bool' or
+'Either Char Int' is. But is calculating the number of inhabitants and pattern
+matching all we can do with ADTs?
 
-== NEXT =======================================================================
+As it turns out, no! This idea goes much deeper. It turns out that if for any
+two types we have functions 'f :: a -> b' and 'g :: b -> a' that are
+bijections, these two types can be considered equal.
 
-In the next lecture, we'll look further into types: we'll discuss recursive
-types and how to define our own type class instances.
+It is important to note the difference in meaning between the word "equal" and
+the "same".
+
+To be very precise, we can say these two types are isomorphic. We'll explore
+this on 'Maybe' and 'Either'.
+
+> m2e :: Maybe a -> Either () a
+> m2e Nothing    = Left ()
+> m2e ( Just a ) = Right a
+
+> e2m :: Either () a -> Maybe a
+> e2m ( Left _ ) = Nothing
+> e2m ( Right a ) = Just a
+
+This is a very important insight, because it tells us that we can express any
+custom data type in terms of just two basic types. A sum or the 'Either a b'
+type, and a product or a pair / '(a , b)'.
+
+Being able to express any custom type in the canonical form opens us up to a
+lot of advanced techniques like generic programming which is incredibly useful
+when we want to operate on the data of certain "shape".
+
+A shining example of generic programming in Haskell is the Aeson library which
+allows us to easily convert our custom data types into JSON and back.
+
+We won't be able to do this yet as we need TypeClasses to complete our
+tool-set, however we can try and write a few canonical variants of our custom
+types for fun.
+
+=== EXERCISE 5 =================================================================
+
+5.1.
+- Let's remember our 'UDT' type from the beginning:
+
+  data UDT = Uno | Dos | Tres
+
+  Write the UDT type in terms of 'Either' and unit / '()'
+
+> type UDT' = () -- replace with a new type
+
+5.2.
+- Express the 'Address' type in terms of 'Either' and tuple '(,)'. While it is
+  certainly possible to express 'Int' and 'String' in such a way (and you will
+  be doing something similar in one of your training exercises) you can leave
+  them as is.
+
+  data Address = Address
+    { addressStreet   :: String
+    , addressNumber   :: Int
+    , addressCity     :: String
+    , addressCountry  :: String
+    } deriving ( Eq , Show , Read )
+
+> type Address' = () -- replace with a new type
+
+5.3.
+- Write eliminators for 'UDT'' and 'Address''.
+
+=== CONCLUSION =================================================================
+
+We have barely scratched the surface of what types are capable in Haskell.
+During our lectures we'll mostly cover the basics, but hopefully, those of you
+interested in Haskell esoterica and more theoretical details have gotten a taste
+of what's hiding underneath the surface.
+
+During the course we'll try to provide some interesting extra materials and
+lectures that demonstrate how data types can be expressed as functions, how to
+prove things, type level programming and other interesting topics.
