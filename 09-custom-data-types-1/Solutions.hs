@@ -41,13 +41,13 @@ cex2 = Color Red Red Green
   - What should be the type for the 'Color' eliminator?
 -}
 
+color :: ( RGB -> RGB -> RGB -> a ) -> Color -> a
 
 {-
   2.2
   - Implement the 'Color' eliminator 'color'.
 -}
 
-color :: ( RGB -> RGB -> RGB -> a ) -> Color -> a
 color f ( Color a b c ) = f a b c
 
 {-
