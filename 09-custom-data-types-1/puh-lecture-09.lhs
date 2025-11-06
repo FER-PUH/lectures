@@ -47,22 +47,6 @@ Types only exist during the compilation time. After the compilation we are just
 left with appropriately placed machine instructions that transform the data in
 certain ways.
 
-Usually types are linked to sets, and the values that inhabit those types to
-members of those sets. However, there's one key difference between the types and
-the sets that makes the Hindley-Milner type system (used in Haskell) so powerful
-and able to infer type of any expression (unless we intentionally weaken the
-inference capabilities).
-
-While sets uniquely determine their members, inhabitants of a type uniquely
-determine the type.
-
-In other words, when we look at a specific value, in the context of sets we
-cannot uniquely determine which set the value belongs to, as it can be a member
-of multiple sets, while in the context of types we immediately know which type a
-specific value inhabits. This is not exactly true in practice as we'll see in a
-bit, but it is a good piece of intuition to develop a better sense about how
-Haskell's type inference works.
-
 === ALGEBRAIC DATA TYPES (ADTs) ================================================
 
 One of the Haskell's killer feature are Algebraic Data Types. While they may not
