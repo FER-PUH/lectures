@@ -130,7 +130,6 @@ than types.
 
 For example, an instance for a list type constructor:
 
-
 > instance Pushable [] where
 >   push x xs   = x:xs
 >   peek (x:_)  = x
@@ -272,9 +271,16 @@ instance Functor ((->) r) where
     fmap = (.)
 
 There are also specific "laws" that must be satisfied by each Functor instance.
-The "issue" is they cannot be checked at compile time,
-so it's your responsibility to make sure they are satisfied.
-In 90% of the cases you'll do it by default, but more on that later.
+
+  (1) fmap id = id
+  (2) fmap (f . g)  ==  fmap f . fmap g
+
+Bad Functor instance:
+
+  instance Functor [] where
+    fmap :: (a -> b) -> [a] -> [b]
+    fmap _ [] = []
+    fmap g (x:xs) = g x : g x : fmap g xs
 
 == EXERCISE 3 ================================================================
 
@@ -311,7 +317,7 @@ The minimal complete definition is 'foldr'. We know how 'foldr' is defined for
 a list:
 
   instance Foldable [] where
-    foldr f z []     = z 
+    foldr f z []     = z
     foldr f z (x:xs) = f x (foldr f z xs)
 
 For our binary tree, a typical definition would be:
