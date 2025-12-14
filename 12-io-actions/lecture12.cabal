@@ -1,0 +1,35 @@
+cabal-version:      3.0
+name:               lecture12
+version:            0.1.0.0
+license:            NONE
+author:             Nikola-Kraljevic
+maintainer:         nikola.kraljevic1c@gmail.com
+category:           Development
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+
+common warnings
+    ghc-options: -Wall
+
+library
+    import:           warnings
+    exposed-modules:  LectureExercises
+    build-depends:    base ^>=4.17.2.1
+                    , containers 
+                    , directory 
+                    , filepath 
+                    , random 
+                    , deepseq
+    default-language: Haskell2010
+
+executable main 
+    import:           warnings
+    main-is:          Main.hs
+    other-modules:    LectureExercises,
+    build-depends:    base ^>=4.17.2.1
+                    , containers 
+                    , directory 
+                    , filepath 
+                    , random 
+                    , deepseq
+    default-language: GHC2021
