@@ -1,17 +1,16 @@
-{-# LANGUAGE ImportQualifiedPost #-}
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 
-module LectureExercises where
+module Exercises where
 
 import Control.DeepSeq (deepseq)
 import Control.Exception
 import Control.Monad
 import Data.Char
 import Data.List
-import Data.Map qualified as Map
+import qualified Data.Map as Map
 import Data.Set (Set)
-import Data.Set qualified as Set
+import qualified Data.Set as Set
 import System.Directory
 import System.Environment
 import System.Exit (die)
@@ -60,7 +59,7 @@ askUser :: String -> (String -> Bool) -> IO String
 askUser message predicate = undefined
 
 -- Generalize 'askUser' to handle input parsing with error handling.
--- For error handling use `readMaybe`.
+-- For error handling use 'readMaybe'.
 askUser' :: (Read a) => String -> (a -> Bool) -> IO a
 askUser' message predicate = undefined
 
@@ -127,18 +126,17 @@ filterWords filteredWords = undefined
 
 -- Define a function that counts the number of characters, words, and lines
 -- in a file.
--- Hint: You will need to use "x `deepseq` return ()" to force input evaluation.
 wc :: FilePath -> IO (Int, Int, Int)
 wc filePath = undefined
 
--- NB: This function may misbehave if we dont use deepseq.
+-- NB: This function may misbehave if we dont use 'deepseq'.
 -- Learn more about it here: https://tinyurl.com/y9xobdyd.
--- Even 'seq' won't suffice; you'll need 'deepseq' from Control.DeepSeq.
+-- Even 'seq' won't suffice; you'll need 'deepseq' from 'Control.DeepSeq'.
 
 -- ** 5.2.
 -- Define a function that copies given lines from the first file into the second.
 copyLines :: [Int] -> FilePath -> FilePath -> IO ()
-copyLines linesToCopy srcFilePath destFilePath = undefined
+copyLines lineNumbersToCopy srcFilePath destFilePath = undefined
 
 -- * EXERCISE 6 ===============================================================
 
@@ -168,7 +166,7 @@ removeSpaces filePath = undefined
 -- if the number is missing. Read from standard input if the file name is
 -- missing. Exit with failure if the file does not exist.
 --
--- Test this by putting `main = fileHead` in Main.hs and running the command
+-- Test this by putting 'main = fileHead' in 'Main.hs' and running the command
 -- cabal run main -- --file testFile1.txt --lines 3
 fileHead :: IO ()
 fileHead = undefined
@@ -178,7 +176,7 @@ fileHead = undefined
 -- standard output. File names are provided via the command line. Print an
 -- error message if any file does not exist.
 --
--- Test this by putting `main = sortFiles` in Main.hs and running the command
+-- Test this by putting 'main = sortFiles' in 'Main.hs' and running the command
 -- cabal run main -- testFile1.txt testFile2.txt testFile3.txt
 sortFiles :: IO ()
 sortFiles = undefined
@@ -188,11 +186,11 @@ sortFiles = undefined
 -- ** 8.1.
 -- Define your own implementation of the 'randoms' function.
 randoms' :: (RandomGen g, Random a) => g -> [a]
-randoms' generator = undefined
+randoms' randomValueGenerator = undefined
 
 -- ** 8.2.
 -- Define a function that generates a list of random integer coordinates within
 -- a specified interval.
--- Example: randomPositions 0 10 0 10 => [(2,1), (4,3), (7,7), ...]
+-- Example: randomPositions (0, 10) (0, 10) => [(2,1), (4,3), (7,7), ...]
 randomPositions :: (Int, Int) -> (Int, Int) -> IO [(Int, Int)]
 randomPositions (x1, x2) (y1, y2) = undefined
