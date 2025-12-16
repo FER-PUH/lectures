@@ -121,13 +121,13 @@ inputStrings = do
 readAndReverse :: IO ()
 readAndReverse = do
   putStrLn "How many lines do I read?"
-  line <- getLine
-  let numberOfLines = read line :: Int
-  lines <- mapM getLinePolitely [1 .. numberOfLines]
-  -- lines <- forM [1 .. numberOfLines] getLinePolitely
-  -- lines <- replicateM n getLine
+  numberLine <- getLine
+  let numberOfLines = read numberLine :: Int
+  inputLines <- mapM getLinePolitely [1 .. numberOfLines]
+  -- inputLines <- forM [1 .. numberOfLines] getLinePolitely
+  -- inputLines <- replicateM n getLine
   putStrLn "Now in reverse order:"
-  mapM_ putStrLn (reverse lines)
+  mapM_ putStrLn (reverse inputLines)
   where
     getLinePolitely index = do
       putStrLn $ "Please enter line " ++ show index ++ ":" 
@@ -344,7 +344,7 @@ randoms' randomValueGenerator =
 -- ** 8.2.
 -- Define a function that generates a list of random integer coordinates within
 -- a specified interval.
--- Example: randomPositions 0 10 0 10 => [(2,1), (4,3), (7,7), ...]
+-- Example: randomPositions (0, 10) (0, 10) => [(2,1), (4,3), (7,7), ...]
 randomPositions :: (Int, Int) -> (Int, Int) -> IO [(Int, Int)]
 randomPositions xRange yRange = do
   sequence $ repeat $ do
