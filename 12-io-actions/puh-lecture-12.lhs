@@ -216,11 +216,11 @@ We can also write the above function like this:
 
 Would the following work?
 
- askNumber6 :: IO String
- askNumber6 = do
-   putStrLn "Enter your lucky number"
-   number <- getLine
-   if number == "" then "7" else number
+  askNumber6 :: IO String
+  askNumber6 = do
+    putStrLn "Enter your lucky number"
+    number <- getLine
+    if number == "" then "7" else number
 
 And why is this no good?
   
@@ -282,13 +282,13 @@ So, this is wrong:
 
 As is this:
   
- askName3 :: IO String
- askName3 = do
-   let s1 = getLine
-       s2 = getLine
-       forename = map toUpper s1
-       lastname = map toUpper s2
-   return $ s1 ++ " " ++ s2
+  askName3 :: IO String
+  askName3 = do
+    let s1 = getLine
+        s2 = getLine
+        forename = map toUpper s1
+        lastname = map toUpper s2
+    return $ s1 ++ " " ++ s2
 
 You can also use a 'where' block, but it has to be placed outside of a 'do'
 block:
@@ -380,9 +380,9 @@ is the same as
 What about this?
 
   main11 = do
-     xs <- sequence [putStrLn "Introducir tres números", 
-                     getLine, getLine, getLine]
-     putStrLn $ "Gracias. Ha introducido " ++ unwords (tail xs)
+    xs <- sequence [putStrLn "Introducir tres números", 
+                    getLine, getLine, getLine]
+    putStrLn $ "Gracias. Ha introducido " ++ unwords (tail xs)
 
 'sequence' is useful for mapping an IO action over a list:
 
