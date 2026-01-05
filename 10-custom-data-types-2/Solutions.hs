@@ -66,8 +66,8 @@ treeToList (Node x left right) = treeToList left ++ [x] ++ treeToList right
 
 -- 3.3
 levelCut :: Int -> Tree a -> Tree a
+levelCut 0 (Node x _ _) = Node x Null Null
 levelCut _ Null = Null
-levelCut 0 _ = Null
 levelCut n (Node x left right) = Node x (levelCut (n-1) left) (levelCut (n-1) right)
 
 
