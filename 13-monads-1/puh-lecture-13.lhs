@@ -25,25 +25,26 @@ Monads are an important concept in Haskell. They abstract various COMPUTATIONAL
 MODELS:
 
   * computation with state
-  * non-deterministic computation
-  * computation that can fail, etc.
+  * computation that can fail
+  * non-deterministic computation, etc.
 
 The most prominent example of a monad is the IO monad, which we use for IO
 operations.
 
 Go through the motivational examples (logged, transactions, knights):
 
-  1. We'll solve the tasks in the "logged" folder together
-  2. Solve all tasks in the "transactions" folder
-  3. Solve all tasks in the "knight" folder
+  1. We'll solve the tasks in the "logged" folder together.
+  2. Solve all tasks in the "transactions" folder.
+  3. Solve all tasks in the "knight" folder.
   4. Look at the "Generalizing into Workflow" part of the pdf presentation to see
-  how we can generalize what we just implemented
+  how we can generalize what we just implemented.
   5. Generalize all these operations under a type class by solving tasks in
-  "workflow.hs"
+  "workflow.hs".
   6. Look at the "Workflow -> Monad" part of the pdf presentation to see how our
-  Workflow maps to the builtin Monad type class
+  Workflow maps to the builtin Monad type class.
   7. Take a look at "monad.hs" too see how we'd implement all above problems
   using real Monads.
+  8. Look at the Monadic Laws and IO Monad section below.
 
 The rest of the lecture should still work on its own. It doesn't rely on the
 motivational examples, but we recommend you take a look at them anyway.
