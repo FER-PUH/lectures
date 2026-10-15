@@ -71,7 +71,15 @@ quartiles :: [Int] -> (Double, Double, Double)
 quartiles = undefined
 
 median :: (Integral a, Fractional b) => [a] -> b
-median = undefined
+median [] = error "median: Empty list"
+median xs
+  | odd l = realToFrac $ ys !! h
+  | otherwise = realToFrac (ys !! h + ys !! (h - 1)) / 2
+  where
+    l = length xs
+    h = l `div` 2
+    ys = sort xs
+
 
 -- === EXERCISE 4 ===============================================================
 
