@@ -11,4 +11,4 @@ function ratePassword(password) {
 }
 
 console.log(ratePassword("AsStrongAsItGets"));
-console.log(ratePassword());
+console.log(ratePassword("ninja"));
