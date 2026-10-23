@@ -19,6 +19,7 @@ v1.2
 == INTRO =====================================================================
 
 What we'll talk about in today's lecture:
+  - Corecursion
   - Accumulators and tail recursion
     - Tail-call optimization
     - Guarded recursion
@@ -46,6 +47,8 @@ fact1 5                        <-- Descending towards the base case
 5 * (4 * fact1 3)
 5 * (4 * (3 * fact1 2))
 5 * (4 * (3 * (2 * fact1 1)))
+5 * (4 * (3 * (2 * (1 * fact1 0))))
+5 * (4 * (3 * (2 * (1 * 1))))
 5 * (4 * (3 * (2 * 1)))        <-- reached the base case and going back "up"
 5 * (4 * (3 * 2))
 5 * (4 * 6)
@@ -263,7 +266,7 @@ Another example is 'unzip'. We may give it a try with an accumulator:
 
 > unzip' :: [(a,b)] -> ([a],[b])
 > unzip' zipped = unz zipped ([], [])
->   where unz [] unzipped = unzipped
+>   where unz [] (xs, ys) = (reverse xs, reverse ys)
 >         unz ((x, y):restZipped) (xs, ys) = unz restZipped (x:xs, y:ys)
 
 But this again doesn't work because of the same reason: we end up with lists in
