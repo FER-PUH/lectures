@@ -52,7 +52,7 @@ listifylist :: [a] -> [[a]]
 listifylist = undefined
 
 
-cutoff :: Num a => a -> [a] -> [a]
+cutoff :: Ord a => a -> [a] -> [a]
 cutoff m = undefined
 
 
