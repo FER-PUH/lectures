@@ -472,9 +472,7 @@ internal state of an object, while type classes specify interactions we can
 have with a value of a certain type.
 
 A type class is an INTERFACE describing what actions we can perform  over the
-supported types. They enable us to have ad-hoc polymorphism. The difference
-between that and the type variable polymorphism we've seen so far is that we can
-have a completely different implementation for each type.
+supported types. They enable us to have ad-hoc polymorphism.
 
 Here's the definition of the 'Eq' type class:
 
@@ -486,13 +484,13 @@ Here's the definition of the 'Eq' type class:
 
 == Deriving
 
-Because of how the 'Eq', 'Ord' and 'Show' type classes are derived by the
-compiler we may have some issues when using their interface in certain cases,
-as we've seen with the 'Artist' type.
-
 By default Haskell has the following "stock" derivable type classes:
 
   | Eq, Ord, Enum, Ix, Bounded, Read, and Show
+
+When we automatically derive type classes,
+the compiler might not generate exactly what we need,
+as we've seen with the 'Artist' type.
 
 As a side note, let's recall the 'Artist' definition:
 
@@ -501,6 +499,9 @@ As a side note, let's recall the 'Artist' definition:
 <   , artistName :: String
 <   , collabs :: [ Artist ]
 <   } deriving ( Eq , Ord , Show , Read )
+
+
+< mercury = Artist {artistId = 2, artistName = "Mercury", collabs = []}
 
 If we use the 'show' on 'mercury' we get the following string (notice the escaped
 quotes):
