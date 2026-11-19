@@ -373,6 +373,16 @@ A sorted tree (binary search tree): for each node containing value 'x', the
 left subtree contains values that are less than 'x', while the right subtree
 contains values that are greater than 'x'. There are no duplicates.
 
+Sorted tree example:
+
+                      ______50______
+                     /              \
+                  __25__          __75__
+                 /      \        /      \
+                12       ●      62      88
+               /  \            /  \    /  \
+              ●    ●          ●    ●  ●    ●
+
 
 === EXERCISE 4 ===============================================================
 
