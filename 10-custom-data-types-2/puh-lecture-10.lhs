@@ -70,6 +70,7 @@ data Order = CoffeeOrder Coffee | PastryOrder Pastry
 > }
 
 
+
   == Fields as getters
 
   hasSugar :: Coffee -> Bool
@@ -136,6 +137,7 @@ data Order = CoffeeOrder Coffee | PastryOrder Pastry
 > isSweet' (CoffeeOrder Coffee { hasSugar }) = hasSugar
 > isSweet' (PastryOrder Burek) = False
 > isSweet' (PastryOrder _) = True
+
 
 
 == Parametrized types
@@ -225,10 +227,10 @@ but more on this later.)
 We now can define:
 
 > songAlbumTitle2 :: Song -> Maybe String
-> songAlbumTitle2 s = fmap albumTitle $ album s
+> songAlbumTitle2 song = fmap albumTitle $ album song
 
 > songReleaseYear2 :: Song -> Maybe Int
-> songReleaseYear2 s = fmap releaseYear $ album s
+> songReleaseYear2 song = fmap releaseYear $ album song
 
 
 === RECURSIVE DATA STRUCTURES  ===============================================
@@ -342,8 +344,6 @@ E.g., a binary tree of integers:
                     2       3
                    / \     / \
                   ●   ●   ●   ●
-
-A function that sums the elements in a binary tree of integers:
 
 
 === EXERCISE 3 ===============================================================
